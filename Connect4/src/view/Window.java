@@ -32,7 +32,7 @@ public class Window extends JFrame {
 		this.setTitle("Connect 4");
 		this.pack();
 		this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-		this.setMinimumSize(new Dimension(800,500));
+		this.setMinimumSize(new Dimension(700,500));
 		//this.setExtendedState(MAXIMIZED_BOTH);
 		this.setResizable(false);
 		this.setLocationRelativeTo(null);
@@ -50,7 +50,7 @@ public class Window extends JFrame {
 		c.gridy = 0;
 		this.mainPanel.add(this.connectPanel,c);
 		
-		this.playersPanel = new P1vsP2Panel();
+		this.playersPanel = new P1vsP2Panel("Alexis", "Gilles");
 		c.gridy = 1;
 		this.mainPanel.add(this.playersPanel,c);
 		

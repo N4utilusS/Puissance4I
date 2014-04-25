@@ -14,11 +14,13 @@ import javax.swing.JPanel;
 public class P1vsP2Panel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	
-	private String namePlayer1="Alexis";
-	private String namePlayer2="Gilles";
+	private String namePlayer1;
+	private String namePlayer2;
 	private int offset=10;
 	
-	public P1vsP2Panel() {
+	public P1vsP2Panel(String name1, String name2) {
+		this.namePlayer1=name1;
+		this.namePlayer2=name2;
 		this.setMinimumSize(new Dimension(500,50));
 		this.setPreferredSize(new Dimension(500,50));
 	}
