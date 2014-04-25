@@ -14,12 +14,18 @@ import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.WindowConstants;
 
+/**
+ * Main window.
+ */
 public class Window extends JFrame {
 	private static final long serialVersionUID = 1L;
 	
 	private JPanel mainPanel;
 	private JMenuBar menuBar;
+	
 	private Connect4Panel connectPanel;
+	private LearnPanel learnPanel;
+	private P1vsP2Panel playersPanel;
 	
 	public Window() {
 		init();
@@ -28,7 +34,7 @@ public class Window extends JFrame {
 		this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		this.setMinimumSize(new Dimension(800,500));
 		//this.setExtendedState(MAXIMIZED_BOTH);
-		//this.setResizable(false);
+		this.setResizable(false);
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);
 	}
@@ -43,6 +49,10 @@ public class Window extends JFrame {
 		c.gridx = 0;
 		c.gridy = 0;
 		this.mainPanel.add(this.connectPanel,c);
+		
+		this.playersPanel = new P1vsP2Panel();
+		c.gridy = 1;
+		this.mainPanel.add(this.playersPanel,c);
 		
 		this.getContentPane().add(this.mainPanel);
 	}

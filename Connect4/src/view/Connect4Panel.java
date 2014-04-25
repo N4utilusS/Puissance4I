@@ -7,6 +7,9 @@ import java.awt.Graphics2D;
 
 import javax.swing.JPanel;
 
+/**
+ * Panel which draws the game.
+ */
 public class Connect4Panel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	
