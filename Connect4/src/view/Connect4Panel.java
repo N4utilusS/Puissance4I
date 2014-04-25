@@ -13,12 +13,15 @@ import javax.swing.JPanel;
 public class Connect4Panel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	
+	private int width=500;
+	private int height=400;
+	
 	private int nRows=6;
 	private int nColumns=7;
 
 	public Connect4Panel() {
-		this.setMinimumSize(new Dimension(500,400));
-		this.setPreferredSize(new Dimension(500,400));
+		this.setMinimumSize(new Dimension(width,height));
+		this.setPreferredSize(new Dimension(width,height));
 	}
 	
 	public void paintComponent(Graphics g) {

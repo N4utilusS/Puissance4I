@@ -54,6 +54,11 @@ public class Window extends JFrame {
 		c.gridy = 1;
 		this.mainPanel.add(this.playersPanel,c);
 		
+		//this.learnPanel = new LearnPanel();
+		//c.gridx=1;
+		//c.gridy=0;
+		//this.mainPanel.add(this.learnPanel);
+		
 		this.getContentPane().add(this.mainPanel);
 	}
 	
