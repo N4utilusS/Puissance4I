@@ -4,16 +4,22 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.io.Writer;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 
 public class Database {
 	private int maxStates = 2;
-	private BufferedReader in;
+	private static Charset UTF8 = Charset.forName("UTF-8");
 	
 	/**
 	 * Update the value of a given state
@@ -22,18 +28,19 @@ public class Database {
 	 */
 	public void setValue(int state[][], int value)
 	{
-		long id = this.createId(state);
-		
-		try {
-			String path = this.path(id, true);
-			this.saveValue(path, id, value);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		//Small verification
+		if(value < 0 || value > 127)
+		{
+			System.err.println("Invalid value given ("+value+"), it should be between 0 and 127!");
+			if(value < 0)
+				value = 0;
+			else if(value > 127)
+				value = 127;
 		}
+
+		long id = this.createId(state);		
+		String path = this.path(id, true);
+		this.saveValue(path, id, value);
 	}
 	
 	/**
@@ -43,20 +50,55 @@ public class Database {
 	 */
 	public int getValue(int state[][])
 	{
-		long id = this.createId(state);
+		long id = this.createId(state);		
+		String path = this.path(id, false);
+		return this.findValue(path, id);		
+	}
+	
+	/**
+	 * For debug only
+	 */
+	public void debug()
+	{
+		//For id creation
+		int state[][] = new int[5][5];
+		for(int i=0; i < state.length; i++)
+			for(int j=0; j < state[i].length; j++)
+				state[i][j] = 1;
 		
-		try {
-			String path = this.path(id, false);
-			return this.findValue(path, id);
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return 0;
+		state[0][0] = 2;
+		state[0][1] = 2;
+		state[0][2] = 2;
+		state[0][3] = 2;
+		state[0][4] = 2;
+		long id1 = this.createId(state);
+		System.out.println("Model, creation id: "+id1);
+		state[0][0] = 1;
+		state[0][1] = 0;
+		state[0][2] = 0;
+		state[0][3] = 0;
+		state[0][4] = 0;
+		state[1][0] = 1;
+		long id2 = this.createId(state);
+		System.out.println("Model, creation id: "+id2);
+
+		//For path creation
+		String path1 = this.path(id1, false);
+		System.out.println("Model, path for "+id1+": "+path1);
+		String path2 = this.path(id2, false);
+		System.out.println("Model, path for "+id2+": "+path2);
+
+		//For saving value
+		path1 = this.path(id1, true);
+		this.saveValue(path1, id1, 25);
+		System.out.println("Saving value for the id "+id1+".");
+		path2 = this.path(id2, true);
+		this.saveValue(path2, id2, 2);
+		System.out.println("Saving value for the id "+id2+".");
+				
+		//For getting value
+		System.out.println("Getting the value for the id "+id1+": "+this.findValue(path1, id1));
+		System.out.println("Getting the value for the id "+id2+": "+this.findValue(path2, id2));
 	}
 	
 	/**
@@ -73,8 +115,8 @@ public class Database {
 		{
 			temp = 0;
 			for(int j=0; j < state[i].length; j++)
-				temp += state[i][j] * Math.pow(this.maxStates, j);
-			id += temp * Math.pow(242, i);//2*3^0 + 2*3^1 + 2*3^2 + 2*3^3 + 2*3^4 = 242. Maximum value for the id : 242*242^0+...= 3 443 973 390
+				temp += state[i][j] * Math.pow(this.maxStates+1, j);
+			id += temp * Math.pow(242+1, i);//2*3^0 + 2*3^1 + 2*3^2 + 2*3^3 + 2*3^4 = 242.
 		}
 		
 		return id;
@@ -88,31 +130,48 @@ public class Database {
 	 * @throws UnsupportedEncodingException 
 	 * @throws FileNotFoundException 
 	 */
-	private String path(long id, boolean canCreate) throws FileNotFoundException, UnsupportedEncodingException
-	{
-		File f = new File("db");
+	private String path(long id, boolean canCreate)
+	{		
+		if(canCreate == false)
+			return "db/"+String.valueOf((id/(255*255*255))/255)+"/"+String.valueOf(id/(255*255*255))+"/"+id/(255*255)+".db";
 		
 		//We check the main directoy
+		File f = new File("db");
 		if(!f.exists())
 			f.mkdir();
 		
-		//We check the main subdirectory
-		long sub = id/(255*255*255);
+		//We check the main sub-directory (we cannot divide directly by 255*255*255*255 it's too big and we got a negative number)
+		long sub = (id/(255*255*255))/255;
 		f = new File("db/"+String.valueOf(sub));
+		if(!f.exists())
+			f.mkdir();
+		
+		//We check the  sub-sub-directory
+		long subsub = id/(255*255*255);
+		f = new File("db/"+String.valueOf(sub)+"/"+String.valueOf(subsub));
 		if(!f.exists())
 			f.mkdir();
 						
 		//Now we can use a file
 		long filename = id/(255*255);
-		f = new File("db/"+String.valueOf(sub)+"/"+filename+".db");
-		if(!f.exists() && canCreate == true)
+		f = new File("db/"+String.valueOf(sub)+"/"+String.valueOf(subsub)+"/"+filename+".db");
+		if(!f.exists())
 		{
-			//We create the file if not existing if asked
-			PrintWriter writer = new PrintWriter("db/"+String.valueOf(sub)+"/"+filename+".db", "UTF-8");
-			writer.close();
+			//We create the file if not existing
+			PrintWriter writer;
+			try {
+				writer = new PrintWriter("db/"+String.valueOf(sub)+"/"+String.valueOf(subsub)+"/"+filename+".db", "UTF-8");
+				writer.close();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
-		return "db/"+String.valueOf(sub)+"/"+filename+".db";
+		return "db/"+String.valueOf(sub)+"/"+String.valueOf(subsub)+"/"+filename+".db";
 	}
 	
 	/**
@@ -132,25 +191,25 @@ public class Database {
 			return 0;
 		
 		//We open the file
-		FileInputStream file;
 		try 
 		{			
-		    file = new FileInputStream(filename);
+		    Reader fr = new InputStreamReader(new FileInputStream(filename), UTF8);
 
 			//We read the file
-			char current;
-			char history[] = new char[4];	
+			int current;
+			int history[] = new int[3];	
 		    try {
 		    	int i = 0;
 		    	int currentId = 0;
-				while(file.available() > 0) {
-				    current = (char) file.read();
+		    	current = fr.read();
+				while(current != -1)
+				{    
 				    history[i] = current;
 				    
 				    //We check if we are at the corresponding line
-				    if(i == 3)
+				    if(i == 2)
 				    {
-				    	 currentId = Integer.parseInt(Character.toString(history[0]))*255 + Integer.parseInt(Character.toString(history[1]));
+				    	 currentId = history[0]*255 + history[1];
 				    	 if(currentId == idIntoFile)
 				    	 {//We are at the correct place
 				    		 value = history[2];
@@ -158,7 +217,8 @@ public class Database {
 				    	 }
 				    }
 				    
-				    i = (i+1)%4;				    
+				    i = (i+1)%3;
+				    current = fr.read();
 				}
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -166,7 +226,7 @@ public class Database {
 			}
 		    
 		    try {
-				file.close();
+				fr.close();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -191,42 +251,63 @@ public class Database {
 	private void saveValue(String filename, long id, int value)
 	{
 		int idIntoFile = (int) (id % (255*255));
-		String line = "";
-				
+		boolean found = false;
+		
 		//We open the file
-		FileInputStream file;
 		try 
 		{			
-		    file = new FileInputStream(filename);
-
-		    File tempFile = File.createTempFile("db/buffer."+System.currentTimeMillis(), ".tmp");
-		    FileWriter fw = new FileWriter(tempFile);
+			File file = new File(filename);
+		    Reader fr = new InputStreamReader(new FileInputStream(filename), UTF8);
+	        
+		    File tempFile = new File("buffer");
+		    Writer fw = new OutputStreamWriter(new FileOutputStream("buffer"), UTF8);	
 
 			//We read the file
-			char current;
-			char history[] = new char[4];	
+			int current;
+			int history[] = new int[3];	
 		    try {
 		    	int i = 0;
 		    	int currentId = 0;
-				while(file.available() > 0) {
-				    current = (char) file.read();
+
+			    current = fr.read();
+				while(current != -1)
+				{
 				    history[i] = current;
 				    
 				    //We check if we are at the corresponding line
-				    if(i == 3)
-				    {
-				    	 currentId = Integer.parseInt(Character.toString(history[0]))*255 + Integer.parseInt(Character.toString(history[1]));
+				    if(i == 2)
+				    {				    	
+				    	 currentId = history[0]*255 + history[1];
 				    	 if(currentId == idIntoFile)
-				    	 {//We are at the correct place, we can replace the character we just read
-				    		 current = (char) value;
-				    		 break;
+				    	 {//We are at the correct place, we can replace the character we just read. We cannot stop the loop anyway
+				    		 current = value;
+				    		 found = true;
 				    	 }
 				    }
 				    
 					fw.write(current);
 				    
-				    i = (i+1)%4;				    
+				    i = (i+1)%3;	
+				    current = fr.read();
 				}
+				
+				//If value not found, we add it
+				if(found == false)
+				{
+					//There is a problem if we want to write 57150 (it becomes 63), but not when we write 47150. So, we need two chars to write the id
+					fw.write((int)Math.floor(idIntoFile/255.0));
+					fw.write(idIntoFile%255);
+					fw.write(value);
+				}
+				
+				//Now we replace the file
+				fw.close();
+				fr.close();
+				if(!file.delete())
+					System.out.println("Impossible to delete the old file...");
+			    if(!tempFile.renameTo(file))
+			    	System.out.println("Impossible to rename the temporary file...");
+				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
