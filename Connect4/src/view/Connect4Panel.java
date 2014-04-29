@@ -4,13 +4,17 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import javax.swing.JPanel;
+
+import controller.Controller;
 
 /**
  * Panel which draws the game.
  */
-public class Connect4Panel extends JPanel {
+public class Connect4Panel extends JPanel implements MouseListener {
 	private static final long serialVersionUID = 1L;
 	
 	private int width=500;
@@ -19,8 +23,11 @@ public class Connect4Panel extends JPanel {
 	private int nRows=6;
 	private int nColumns=7;
 	private int table[][] = new int[nRows][nColumns];
+	
+	private Controller controller;
 
-	public Connect4Panel() {
+	public Connect4Panel(Controller controller) {
+		this.controller = controller;
 		this.setMinimumSize(new Dimension(width,height));
 		this.setPreferredSize(new Dimension(width,height));
 		init();
@@ -33,6 +40,8 @@ public class Connect4Panel extends JPanel {
 		//TODOÊremove the 2 following lines.
 		table[5][6]=1;
 		table[5][0]=2;
+		
+		this.addMouseListener(this);
 	}
 	
 	public void paintComponent(Graphics g) {
@@ -61,6 +70,35 @@ public class Connect4Panel extends JPanel {
 			}
 		}
 		
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		this.controller.checkPlayerDecision(arg0.getX() / (this.width / 7));
 	}
 
 }

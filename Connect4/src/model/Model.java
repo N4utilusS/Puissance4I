@@ -28,7 +28,7 @@ public class Model implements Subject {
 	/**
 	 * Returns the value of a given state
 	 * @param state the state which is a table 5x5
-	 * @return int a value between 0 and 255
+	 * @return a value between 0 and 255
 	 */
 	public int getValue(int state[][])
 	{

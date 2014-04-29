@@ -7,6 +7,8 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import controller.Controller;
+
 /**
  * Panel which contains the Player1 vs Player2 box. 
  * It indicates visually which player's turn is.
@@ -16,13 +18,16 @@ public class P1vsP2Panel extends JPanel {
 	
 	private String namePlayer1;
 	private String namePlayer2;
-	private int offset=10;
+	private int offset = 10;
 	
 	private JButton button1, button2;
 	
-	public P1vsP2Panel(String name1, String name2) {
-		this.namePlayer1=name1;
-		this.namePlayer2=name2;
+	private Controller controller;
+	
+	public P1vsP2Panel(Controller controller, String name1, String name2) {
+		this.controller = controller;
+		this.namePlayer1 = name1;
+		this.namePlayer2 = name2;
 		this.setMinimumSize(new Dimension(500,50));
 		this.setPreferredSize(new Dimension(500,50));
 		init();
