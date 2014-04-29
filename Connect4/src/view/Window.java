@@ -14,10 +14,13 @@ import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.WindowConstants;
 
+import observer.Observer;
+import controller.Controller;
+
 /**
  * Main window.
  */
-public class Window extends JFrame {
+public class Window extends JFrame implements Observer {
 	private static final long serialVersionUID = 1L;
 	
 	private JPanel mainPanel;
@@ -27,7 +30,10 @@ public class Window extends JFrame {
 	private LearnPanel learnPanel;
 	private P1vsP2Panel playersPanel;
 	
-	public Window() {
+	private Controller controller;
+	
+	public Window(Controller controller) {
+		this.controller = controller;
 		init();
 		this.setTitle("Connect 4");
 		this.pack();
@@ -85,6 +91,12 @@ public class Window extends JFrame {
 		menu.add(menuItem);
 		
 		this.setJMenuBar(this.menuBar);
+	}
+
+	@Override
+	public void update() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

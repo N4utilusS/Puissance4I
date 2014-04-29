@@ -1,3 +1,4 @@
+import controller.Controller;
 import model.Model;
 import view.Window;
 
@@ -8,7 +9,9 @@ import view.Window;
 public class Main {
 	
 	public static void main(String[] args) {
-		new Window();
-		new Model();
+		Model model = new Model();
+		Controller controller = new Controller(model);
+		Window window = new Window(controller);
+		model.addObserver(window);
 	}
 }
