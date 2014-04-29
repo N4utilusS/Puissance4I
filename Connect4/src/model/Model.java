@@ -1,7 +1,13 @@
 package model;
 
-public class Model {
+import java.util.ArrayList;
+
+import observer.Observer;
+import observer.Subject;
+
+public class Model implements Subject {
 	private Database database;
+	private ArrayList<Observer> listObserver = new ArrayList<Observer>();
 	
 	public Model()
 	{
@@ -10,7 +16,7 @@ public class Model {
 	}
 	
 	/**
-	 * Update the value of a given state
+	 * Updates the value of a given state
 	 * @param state the state which is a table 5x5
 	 * @param value the new value to save (value between 0 and 255)
 	 */
@@ -27,5 +33,16 @@ public class Model {
 	public int getValue(int state[][])
 	{
 		return database.getValue(state);	
+	}
+
+	@Override
+	public void addObserver(Observer obs) {
+		this.listObserver.add(obs);
+	}
+
+	@Override
+	public void notifyObserver() {
+		for (Observer obs : this.listObserver)
+			obs.update();
 	}
 }
