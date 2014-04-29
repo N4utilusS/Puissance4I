@@ -2,11 +2,9 @@ package view;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.GridBagConstraints;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 
-import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -26,9 +24,9 @@ public class LearnPanel extends JPanel {
 	
 	public LearnPanel() {
 		init();
-		this.setMinimumSize(new Dimension(220,110));
-		this.setPreferredSize(new Dimension(220,110));
-		this.setBorder(BorderFactory.createTitledBorder("Learn"));
+		this.setMinimumSize(new Dimension(500,50)); //220,110
+		this.setPreferredSize(new Dimension(500,50));
+		//this.setBorder(BorderFactory.createTitledBorder("Learn"));
 	}
 	
 	public void init() {

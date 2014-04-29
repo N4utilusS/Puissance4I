@@ -45,19 +45,18 @@ public class Window extends JFrame {
 		
 		createMenu();
 		
+		this.learnPanel = new LearnPanel();
+		c.gridx=0;
+		c.gridy=0;
+		this.mainPanel.add(this.learnPanel);
+		
 		this.connectPanel = new Connect4Panel();
-		c.gridx = 0;
-		c.gridy = 0;
+		c.gridy = 1;
 		this.mainPanel.add(this.connectPanel,c);
 		
 		this.playersPanel = new P1vsP2Panel("Alexis", "Gilles");
-		c.gridy = 1;
+		c.gridy = 2;
 		this.mainPanel.add(this.playersPanel,c);
-		
-		//this.learnPanel = new LearnPanel();
-		//c.gridx=1;
-		//c.gridy=0;
-		//this.mainPanel.add(this.learnPanel);
 		
 		this.getContentPane().add(this.mainPanel);
 	}
