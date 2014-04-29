@@ -1,6 +1,7 @@
 package model.learning;
 
 import model.Board;
+import model.Database;
 
 public class PseudoState {
 	public final static int WIDTH = 5;
@@ -16,6 +17,12 @@ public class PseudoState {
 		this.value = value;
 	}
 	
+	/**
+	 * We suppose, for performance reasons, that all uninitialized int variables are set to 0.
+	 * @param column
+	 * @param board
+	 * @return
+	 */
 	public static PseudoState getPseudoStateForColumn(int column, Board board){
 		
 		int begin = column-WIDTH/2;
@@ -40,8 +47,17 @@ public class PseudoState {
 			}
 		}
 		
+		int value = Database.getInstance().getValue(grid);
 		
-		
-		return new PseudoState(grid, );
+		return new PseudoState(grid, value);
 	}
+
+	public int[][] getGrid() {
+		return grid;
+	}
+
+	public int getValue() {
+		return value;
+	}
+	
 }

@@ -14,6 +14,7 @@ public class Game {
 		switch (mode) {
 		case COMPUTER_VS_COMPUTER:
 			this.players[0] = new Decider();
+			this.players[1] = new Decider();
 		}
 	}
 }

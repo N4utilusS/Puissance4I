@@ -4,9 +4,15 @@ import model.Board;
 
 public class Player extends AbstractPlayer {
 
+	public Player(int number) {
+		super(number);
+	}
+
 	@Override
 	public Board play(Board board) {
-		// TODO Auto-generated method stub
+		
+		// Send state to the view
+		
 		return null;
 	}
 
