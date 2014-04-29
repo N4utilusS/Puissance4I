@@ -51,16 +51,16 @@ public class Window extends JFrame implements Observer {
 		
 		createMenu();
 		
-		this.learnPanel = new LearnPanel();
+		this.learnPanel = new LearnPanel(this.controller);
 		c.gridx=0;
 		c.gridy=0;
 		this.mainPanel.add(this.learnPanel);
 		
-		this.connectPanel = new Connect4Panel();
+		this.connectPanel = new Connect4Panel(this.controller);
 		c.gridy = 1;
 		this.mainPanel.add(this.connectPanel,c);
 		
-		this.playersPanel = new P1vsP2Panel("Alexis", "Gilles");
+		this.playersPanel = new P1vsP2Panel(this.controller, "Alexis", "Gilles");
 		c.gridy = 2;
 		this.mainPanel.add(this.playersPanel,c);
 		
