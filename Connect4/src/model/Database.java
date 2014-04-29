@@ -17,6 +17,28 @@ public class Database {
 	private int maxStates = 2;
 	private static Charset UTF8 = Charset.forName("UTF-8");
 	
+	private static Database instance = null;
+	private static Object o = new Object();
+	
+
+	private Database(){
+		super();
+	}
+	
+	/**
+	 * Return the only instance of the connection with the database.
+	 * @return The only instance of the connection with the database.
+	 */
+	public static Database getInstance(){
+		synchronized(o){
+			if (instance == null) {
+				instance = new Database();
+			}
+		}
+		
+		return instance;
+	}
+	
 	/**
 	 * Update the value of a given state
 	 * @param state the state which is a table 5x5
