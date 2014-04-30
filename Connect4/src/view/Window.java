@@ -14,6 +14,8 @@ import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.WindowConstants;
 
+import model.players.Adviser;
+import model.players.Player;
 import observer.Observer;
 import controller.Controller;
 
@@ -31,6 +33,9 @@ public class Window extends JFrame implements Observer {
 	private P1vsP2Panel playersPanel;
 	
 	private Controller controller;
+	
+	private int[][] state = new int[6][7];
+	private int[] hint = new int[7];
 	
 	public Window(Controller controller) {
 		this.controller = controller;
@@ -95,8 +100,13 @@ public class Window extends JFrame implements Observer {
 
 	@Override
 	public void update(Object o) {
-		// TODO Auto-generated method stub
-		
+		if (o instanceof Player) {
+			this.state = ((Player) o).getState();
+			// TODO Change grid ?
+		} else if (o instanceof Adviser) {
+			this.hint = ((Adviser) o).getValues();
+			// TODO Display hint values
+		}
 	}
 
 }
