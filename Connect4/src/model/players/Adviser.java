@@ -1,5 +1,5 @@
 package model.players;
 
-public class Adviser {
+public class Adviser extends AbstractPlayer{
 
 }

@@ -10,8 +10,8 @@ public class Decider extends AbstractPlayer {
 	public final static float EPSILON = 0.1f;
 	private Random random;
 	
-	public Decider(int number){
-		super(number);
+	public Decider(int type){
+		super(type);
 		
 		this.random = new Random();
 	}

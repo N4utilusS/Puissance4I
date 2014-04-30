@@ -94,7 +94,7 @@ public class Window extends JFrame implements Observer {
 	}
 
 	@Override
-	public void update() {
+	public void update(Object o) {
 		// TODO Auto-generated method stub
 		
 	}
