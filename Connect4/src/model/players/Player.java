@@ -4,7 +4,7 @@ import observer.Observer;
 import observer.Subject;
 import model.Board;
 
-public class Player extends AbstractPlayer implements Subject{
+public class Player extends AbstractPlayer implements Subject {
 	
 	private Observer observer;
 
@@ -12,6 +12,10 @@ public class Player extends AbstractPlayer implements Subject{
 		super(type);
 		
 		addObserver(obs);
+	}
+	
+	public int[][] getState() {
+		return null;
 	}
 
 	@Override

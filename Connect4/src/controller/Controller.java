@@ -23,7 +23,7 @@ public class Controller {
 	}
 	
 	/**
-	 * Checks to the chosen column.
+	 * Checks the chosen column.
 	 * @param column the column chosen by the player (0 for the first column, 1 for the second one, ...)
 	 */
 	public void checkPlayerDecision(int column) {
