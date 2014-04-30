@@ -3,24 +3,23 @@ package model.players;
 import observer.Observer;
 import observer.Subject;
 import model.Board;
+import model.learning.PseudoState;
 
 public class Player extends AbstractPlayer implements Subject{
 	
 	private Observer observer;
 
-	public Player(int type, Observer obs) {
-		super(type);
+	public Player(int type, Board board, Observer obs) {
+		super(type, board);
 		
 		addObserver(obs);
 	}
 
 	@Override
-	public Board play(Board board) {
+	public void play() {
 		
-		// Send state to the view
+		// Send state to the view to allow the human to choose.
 		notifyObserver();
-		
-		return null;
 	}
 
 	@Override
@@ -31,6 +30,12 @@ public class Player extends AbstractPlayer implements Subject{
 	@Override
 	public void notifyObserver() {
 		this.observer.update(this);
+	}
+	
+	public void setAction(int column) {
+		PseudoState state = PseudoState.getPseudoStateForColumn(column, getBoard());
+		getLearner().newState(state);
+		getBoard().addCoinInColumn(column, getType());
 	}
 
 }

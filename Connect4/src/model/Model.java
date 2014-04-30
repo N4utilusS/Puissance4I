@@ -23,6 +23,6 @@ public class Model implements Subject {
 	@Override
 	public void notifyObserver() {
 		for (Observer obs : this.listObserver)
-			obs.update();
+			obs.update(this);
 	}
 }

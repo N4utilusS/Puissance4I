@@ -3,6 +3,7 @@ package model;
 public class Board {
 	public final static int WIDTH = 7;
 	public final static int HEIGHT = 6;
+	public final static int AMOUNT_TO_WIN = 4;	
 	
 	private int[][] grid;
 	private int[] heights;
@@ -19,25 +20,10 @@ public class Board {
 		this.heights = heights;
 	}
 	
-	public Board addCoinInColumn(int column, int coinType){
-		int[][] grid = deepGridClone();
-		int[] heights = this.heights.clone();
+	public void addCoinInColumn(int column, int coinType){
 		
 		grid[column][heights[column]] = coinType;
 		heights[column]++;
-	    
-		return new Board(grid, heights);
-	}
-	
-	private int[][] deepGridClone(){
-		if (this.grid == null)
-	        return null;
-	    int[][] grid = new int[this.grid.length][];
-	    for (int r = 0; r < this.grid.length; r++) {
-	        grid[r] = this.grid[r].clone();
-	    }
-	    
-	    return grid;
 	}
 
 	public int[][] getGrid() {
@@ -48,4 +34,76 @@ public class Board {
 		return heights;
 	}
 	
+	public boolean gameOver() {
+		int count = 0;
+		int type = 0;
+		
+		// Look at rows
+		for (int j = 0; j < Board.HEIGHT; ++j) {
+			for (int i = 0; i < Board.WIDTH; ++i) {
+				if (grid[i][j] != type) {
+					count = 0;
+					type = grid[i][j];
+				}
+				if (type != 0)
+					count++;
+				if (count == AMOUNT_TO_WIN)
+					return true;
+			}
+			
+			count = 0;
+		}
+		
+		// Look at columns
+		for (int i = 0; i < Board.WIDTH; ++i) {
+			for (int j = 0; j < Board.HEIGHT; ++j) {
+				if (grid[i][j] != type) {
+					count = 0;
+					type = grid[i][j];
+				}
+				if (type != 0)
+					count++;
+				if (count == AMOUNT_TO_WIN)
+					return true;
+			}
+			
+			count = 0;
+		}
+		
+		// Diagonals SouthEast
+		for (int j = AMOUNT_TO_WIN; j < Board.HEIGHT; ++j) {
+			for (int i = 0; j - i >= 0; ++i) {
+				if (grid[i][j-i] != type) {
+					count = 0;
+					type = grid[i][j];
+				}
+				if (type != 0)
+					count++;
+				if (count == AMOUNT_TO_WIN)
+					return true;
+			}
+			
+			count = 0;
+		}
+		
+		for (int i = 1; i <= Board.WIDTH-4; ++i) {
+			for (int j = Board.HEIGHT; j >= 0 && i + Board.HEIGHT - j <= Board.WIDTH; --j) {
+				if (grid[i + Board.HEIGHT - j][j] != type) {
+					count = 0;
+					type = grid[i][j];
+				}
+				if (type != 0)
+					count++;
+				if (count == AMOUNT_TO_WIN)
+					return true;
+			}
+			
+			count = 0;
+		}
+		
+		// Diagonals NorthEast
+		
+		
+		return false;
+	}
 }

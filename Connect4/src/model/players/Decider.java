@@ -10,21 +10,21 @@ public class Decider extends AbstractPlayer {
 	public final static float EPSILON = 0.1f;
 	private Random random;
 	
-	public Decider(int type){
-		super(type);
+	public Decider(int type, Board board){
+		super(type, board);
 		
 		this.random = new Random();
 	}
 
 	@Override
-	public Board play(Board board) {
+	public void play() {
 		PseudoState[] states = new PseudoState[Board.WIDTH];
 		int maxValue = 0;
 		int column = 0;
 		
 		// Get all the pseudo states for all the columns.
 		for (int i = 0; i < Board.WIDTH; ++i) {
-			states[i] = PseudoState.getPseudoStateForColumn(i, board);
+			states[i] = PseudoState.getPseudoStateForColumn(i, getBoard());
 			
 			if (states[i].getValue() >= maxValue) {
 				maxValue = states[i].getValue();
@@ -36,10 +36,10 @@ public class Decider extends AbstractPlayer {
 		if (random.nextFloat() < EPSILON) {
 			int rand = random.nextInt(Board.WIDTH);
 			getLearner().newState(states[rand]);
-			return board.addCoinInColumn(rand, getType());
+			getBoard().addCoinInColumn(rand, getType());
 		} else {
 			getLearner().newState(states[column]);
-			return board.addCoinInColumn(column, getType());
+			getBoard().addCoinInColumn(column, getType());
 		}
 	}
 }

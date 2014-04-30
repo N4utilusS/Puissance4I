@@ -7,15 +7,17 @@ public abstract class AbstractPlayer {
 	
 	private Learner learner;
 	private int type;
+	private Board board;
 
-	public AbstractPlayer(int type){
+	public AbstractPlayer(int type, Board board){
 		super();
 		
 		this.type = type;
+		this.board = board;
 		this.learner = new Learner();
 	}
 	
-	abstract public Board play(Board board);
+	abstract public void play();
 
 	public int getType() {
 		return type;
@@ -23,5 +25,9 @@ public abstract class AbstractPlayer {
 	
 	public Learner getLearner() {
 		return this.learner;
+	}
+
+	public Board getBoard() {
+		return board;
 	}
 }
