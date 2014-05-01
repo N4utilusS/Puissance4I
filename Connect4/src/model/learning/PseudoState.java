@@ -3,6 +3,11 @@ package model.learning;
 import model.Board;
 import model.Database;
 
+/**
+ * Represents a pseudo state of the board, containing only a smaller neighbourhood of the considered column to improve space complexity.
+ * The algorithm only has a partial knowledge of the current global state of the game.
+ *
+ */
 public class PseudoState {
 	public final static int WIDTH = 5;
 	public final static int HEIGHT = 5;
@@ -19,9 +24,9 @@ public class PseudoState {
 	
 	/**
 	 * We suppose, for performance reasons, that all uninitialized int variables are set to 0.
-	 * @param column
-	 * @param board
-	 * @return
+	 * @param column The number of the column we want the pseudo state from.
+	 * @param board The game board.
+	 * @return The created pseudo state.
 	 */
 	public static PseudoState getPseudoStateForColumn(int column, Board board){
 		
@@ -52,10 +57,18 @@ public class PseudoState {
 		return new PseudoState(grid, value);
 	}
 
+	/**
+	 * Returns the matrix of the pseudo state, with all the coin types.
+	 * @return
+	 */
 	public int[][] getGrid() {
 		return grid;
 	}
 
+	/**
+	 * Returns the value associated to this pseudo state.
+	 * @return
+	 */
 	public int getValue() {
 		return value;
 	}

@@ -5,6 +5,10 @@ import model.learning.PseudoState;
 import observer.Observer;
 import observer.Subject;
 
+/**
+ * Player not actually playing itself, but advising a human player by sending him the values of the pseudo states.
+ *
+ */
 public class Adviser extends AbstractPlayer implements Subject {
 
 	private Observer observer;
@@ -43,6 +47,10 @@ public class Adviser extends AbstractPlayer implements Subject {
 		this.observer.update(this);
 	}
 	
+	/**
+	 * Called to get the values.
+	 * @return
+	 */
 	public int[] getValues() {
 		return this.values;
 	}

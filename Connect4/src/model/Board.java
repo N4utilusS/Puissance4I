@@ -1,5 +1,10 @@
 package model;
 
+/**
+ * Represents the playing board and its state, with a matrix of integers and
+ * the heights of the different columns.
+ *
+ */
 public class Board {
 	public final static int WIDTH = 7;
 	public final static int HEIGHT = 6;
@@ -20,25 +25,46 @@ public class Board {
 		this.heights = heights;
 	}
 	
+	/**
+	 * Used to insert a coin in the specified column.
+	 * @param column The column number to insert to coin into.
+	 * @param coinType The coin type of the player.
+	 */
 	public void addCoinInColumn(int column, int coinType){
 		
 		grid[column][heights[column]] = coinType;
 		heights[column]++;
 	}
 	
+	/**
+	 * Used to remove a coin in the specified column.
+	 * @param column The column number where to remove the coin.
+	 */
 	public void removeCoinInColumn(int column) {
 		grid[column][heights[column]-1] = 0;
 		heights[column]--;
 	}
 
+	/**
+	 * Returns the matrix containing all the coin types, representing the game board.
+	 * @return
+	 */
 	public int[][] getGrid() {
 		return grid;
 	}
 
+	/**
+	 * Returns the height of each column in a vector.
+	 * @return
+	 */
 	public int[] getHeights() {
 		return heights;
 	}
 	
+	/**
+	 * Return a boolean telling if the game is over, by the rules of the game (not if the board is filled).
+	 * @return
+	 */
 	public boolean gameOver() {
 		int count = 0;
 		int type = 0;
@@ -140,6 +166,10 @@ public class Board {
 		return false;
 	}
 	
+	/**
+	 * Returns a boolean telling if the board is filled entirely.
+	 * @return
+	 */
 	public boolean isFull() {
 		for (int i = 0; i < Board.WIDTH; ++i) {
 			if (this.heights[i] < Board.HEIGHT)

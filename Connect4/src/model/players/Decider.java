@@ -8,6 +8,11 @@ import model.learning.PseudoState;
 import observer.Observer;
 import observer.Subject;
 
+/**
+ * Computer player using the epsilon-Greedy algorithm to play.
+ * This player is also used to learn during large quantities of games.
+ *
+ */
 public class Decider extends AbstractPlayer implements Subject{
 
 	public final static float EPSILON = 0.1f;
@@ -81,6 +86,10 @@ public class Decider extends AbstractPlayer implements Subject{
 		return this.getBoard().getGrid();
 	}
 	
+	/**
+	 * Returns the values of the pseudo states.
+	 * @return
+	 */
 	public int[] getValues() {
 		return this.values;
 	}

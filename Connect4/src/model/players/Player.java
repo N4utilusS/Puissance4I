@@ -5,6 +5,11 @@ import observer.Subject;
 import model.Board;
 import model.learning.PseudoState;
 
+/**
+ * Class for the human player. Contacts the view to send the state of the game.
+ * The view then sends back the action chosen, so the game can go on.
+ *
+ */
 public class Player extends AbstractPlayer implements Subject {
 	
 	public final static int PLAYING = 0;
@@ -22,6 +27,10 @@ public class Player extends AbstractPlayer implements Subject {
 		addObserver(obs);
 	}
 	
+	/**
+	 * Returns the matrix containing all the coin types, the actual state of the game.
+	 * @return
+	 */
 	public int[][] getState() {
 		return this.getBoard().getGrid();
 	}
@@ -43,6 +52,11 @@ public class Player extends AbstractPlayer implements Subject {
 		this.observer.update(this);
 	}
 	
+	/**
+	 * Must be called to set the choice of the human player in the view.
+	 * Puts the coin in the column and gives the new pseudo state to the learner.
+	 * @param column The chosen column.
+	 */
 	public void setAction(int column) {
 		getBoard().addCoinInColumn(column, getType());
 		PseudoState state = PseudoState.getPseudoStateForColumn(column, getBoard());
@@ -73,6 +87,10 @@ public class Player extends AbstractPlayer implements Subject {
 		this.notifyObserver();
 	}
 
+	/**
+	 * Returns the status of the player, that is, if the player is currently playing, or if he has lost, won, or filled the board with the other player.
+	 * @return
+	 */
 	public int getStatus() {
 		return this.status;
 	}
