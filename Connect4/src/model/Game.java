@@ -17,6 +17,7 @@ public class Game {
 	public Game(int mode, Observer obs){
 		
 		this.board = new Board();
+		this.players = new AbstractPlayer[2];
 		
 		switch (mode) {
 		case COMPUTER_VS_COMPUTER:

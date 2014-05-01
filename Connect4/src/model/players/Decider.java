@@ -13,6 +13,7 @@ public class Decider extends AbstractPlayer implements Subject{
 	public final static float EPSILON = 0.1f;
 	private Random random;
 	private Observer observer;
+	private int[] values;
 
 	public Decider(int type, Board board, Observer obs){
 		super(type, board);
@@ -28,6 +29,7 @@ public class Decider extends AbstractPlayer implements Subject{
 		int column = 0;
 		int[] heights = getBoard().getHeights();
 		ArrayList<Integer> available = new ArrayList<Integer>();
+		this.values = new int[Board.WIDTH];
 
 		// Get all the pseudo states for all the columns.
 		for (int i = 0; i < Board.WIDTH; ++i) {
@@ -42,6 +44,7 @@ public class Decider extends AbstractPlayer implements Subject{
 				}
 				
 				available.add(i);
+				values[i] = states[i].getValue();
 			}
 		}
 
@@ -54,6 +57,9 @@ public class Decider extends AbstractPlayer implements Subject{
 			getLearner().newState(states[rand]);
 			getBoard().addCoinInColumn(rand, getType());
 		}
+		
+		// Notify:
+		this.notifyObserver();
 	}
 	
 	@Override
@@ -69,5 +75,9 @@ public class Decider extends AbstractPlayer implements Subject{
 	
 	public int[][] getState() {
 		return this.getBoard().getGrid();
+	}
+	
+	public int[] getValues() {
+		return this.values;
 	}
 }

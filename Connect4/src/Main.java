@@ -13,5 +13,6 @@ public class Main {
 		Controller controller = new Controller(model);
 		Window window = new Window(controller);
 		model.addObserver(window);
+		model.startGame();	// TODO REMOVE
 	}
 }

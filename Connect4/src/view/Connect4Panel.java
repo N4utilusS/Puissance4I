@@ -37,9 +37,9 @@ public class Connect4Panel extends JPanel implements MouseListener {
 		for(int i=0; i<nColumns; i++)
 			for(int j=0; j<nRows; j++)
 				table[i][j]=0;
-		//TODOÊremove the 2 following lines.
-		table[6][5]=1;
-		table[0][5]=2;
+		//TODOï¿½remove the 2 following lines.
+		//table[6][5]=1;
+		//table[0][5]=2;
 		
 		this.addMouseListener(this);
 	}
@@ -62,15 +62,15 @@ public class Connect4Panel extends JPanel implements MouseListener {
 				if(table[i][j]==0) {
 					//Empty holes
 					g2.setColor(new Color(237,237,237));
-					g2.fillOval(this.getWidth()/nColumns*i, this.getHeight()/nRows*j, this.getWidth()/nColumns, this.getHeight()/nRows);
+					g2.fillOval(this.getWidth()/nColumns*i, this.getHeight() - this.getHeight()/nRows*(j+1), this.getWidth()/nColumns, this.getHeight()/nRows);
 				} else if(table[i][j]==1) {
 					//Yellow discs
 					g2.setColor(Color.YELLOW);
-					g2.fillOval(this.getWidth()/nColumns*i, this.getHeight()/nRows*j, this.getWidth()/nColumns, this.getHeight()/nRows);
+					g2.fillOval(this.getWidth()/nColumns*i, this.getHeight() - this.getHeight()/nRows*(j+1), this.getWidth()/nColumns, this.getHeight()/nRows);
 				} else {
 					//Red discs
 					g2.setColor(Color.RED);
-					g2.fillOval(this.getWidth()/nColumns*i, this.getHeight()/nRows*j, this.getWidth()/nColumns, this.getHeight()/nRows);	
+					g2.fillOval(this.getWidth()/nColumns*i, this.getHeight() - this.getHeight()/nRows*(j+1), this.getWidth()/nColumns, this.getHeight()/nRows);	
 				}
 			}
 		}

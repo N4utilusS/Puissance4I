@@ -25,4 +25,9 @@ public class Model implements Subject { // TODO Need to implement Subject ?
 		for (Observer obs : this.listObserver)
 			obs.update(this);
 	}
+	
+	public void startGame() {
+		Game game = new Game(Game.COMPUTER_VS_COMPUTER, this.listObserver.get(0));
+		game.letsPlay();
+	}
 }

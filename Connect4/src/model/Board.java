@@ -76,7 +76,7 @@ public class Board {
 		}
 		
 		// Diagonals SouthEast
-		for (int j = AMOUNT_TO_WIN; j < Board.HEIGHT; ++j) {
+		for (int j = AMOUNT_TO_WIN-1; j < Board.HEIGHT; ++j) {
 			for (int i = 0; j - i >= 0 && i < Board.WIDTH; ++i) {
 				if (grid[i][j-i] != type) {
 					count = 0;
@@ -92,7 +92,7 @@ public class Board {
 		}
 		
 		for (int i = 1; i <= Board.WIDTH-4; ++i) {
-			for (int j = Board.HEIGHT; j >= 0 && i + Board.HEIGHT - j < Board.WIDTH; --j) {
+			for (int j = Board.HEIGHT-1; j >= 0 && i + Board.HEIGHT - j < Board.WIDTH; --j) {
 				if (grid[i + Board.HEIGHT - j][j] != type) {
 					count = 0;
 					type = grid[i + Board.HEIGHT - j][j];
