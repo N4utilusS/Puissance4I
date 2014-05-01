@@ -37,7 +37,7 @@ public class LearnPanel extends JPanel implements ActionListener {
 	}
 	
 	public void init() {
-		this.nbOfGamesPlayed=new JTextField(3);
+		this.nbOfGamesPlayed=new JTextField(10);
 		this.nbOfGamesPlayed.setText("0");
 		//this.nbOfGamesPlayed.setEditable(false);
 		JLabel label = new JLabel("Nb of Games played: ");

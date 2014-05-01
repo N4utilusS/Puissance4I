@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.WindowConstants;
 
+import model.Model;
 import model.players.Adviser;
 import model.players.Decider;
 import model.players.Player;
@@ -111,12 +112,15 @@ public class Window extends JFrame implements Observer {
 			Decider d = (Decider) o;
 			this.connectPanel.updateTable(d.getState());
 			this.hintPanel.updateHint(d.getValues());
+			
 			/*try {
 				Thread.sleep(50);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}*/
+		} else if (o instanceof Model) {
+			this.learnPanel.setNbOfGamesPlayed(((Model) o).getGamesPlayed());
 		}
 	}
 
