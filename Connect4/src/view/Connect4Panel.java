@@ -44,6 +44,11 @@ public class Connect4Panel extends JPanel implements MouseListener {
 		this.addMouseListener(this);
 	}
 	
+	public void updateTable(int[][] table) {
+		this.table = table;
+		this.repaint();
+	}
+	
 	public void paintComponent(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
 		

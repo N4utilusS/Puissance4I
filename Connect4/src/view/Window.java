@@ -31,11 +31,9 @@ public class Window extends JFrame implements Observer {
 	private Connect4Panel connectPanel;
 	private LearnPanel learnPanel;
 	private P1vsP2Panel playersPanel;
+	private HintPanel hintPanel;
 	
 	private Controller controller;
-	
-	private int[][] state = new int[6][7];
-	private int[] hint = new int[7];
 	
 	public Window(Controller controller) {
 		this.controller = controller;
@@ -63,11 +61,15 @@ public class Window extends JFrame implements Observer {
 		
 		this.connectPanel = new Connect4Panel(this.controller);
 		c.gridy = 1;
-		this.mainPanel.add(this.connectPanel,c);
+		this.mainPanel.add(this.connectPanel, c);
+		
+		this.hintPanel = new HintPanel(this.controller);
+		c.gridy = 2;
+		this.mainPanel.add(this.hintPanel, c);
 		
 		this.playersPanel = new P1vsP2Panel(this.controller, "Alexis", "Gilles");
-		c.gridy = 2;
-		this.mainPanel.add(this.playersPanel,c);
+		c.gridy = 3;
+		this.mainPanel.add(this.playersPanel, c);
 		
 		this.getContentPane().add(this.mainPanel);
 	}
@@ -101,11 +103,9 @@ public class Window extends JFrame implements Observer {
 	@Override
 	public void update(Object o) {
 		if (o instanceof Player) {
-			this.state = ((Player) o).getState();
-			// TODO Change grid ?
+			this.connectPanel.updateTable(((Player) o).getState());
 		} else if (o instanceof Adviser) {
-			this.hint = ((Adviser) o).getValues();
-			// TODO Display hint values
+			this.hintPanel.updateHint(((Adviser) o).getValues());
 		}
 	}
 
