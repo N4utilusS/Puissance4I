@@ -20,6 +20,8 @@ public class Database {
 	private static Database instance = null;
 	private static Object o = new Object();
 	
+	private final static String PATH_BEG = "db/";
+	
 
 	private Database(){
 		super();
@@ -151,34 +153,34 @@ public class Database {
 	private String path(long id, boolean canCreate)
 	{		
 		if(canCreate == false)
-			return "db/"+String.valueOf((id/(255*255*255))/255)+"/"+String.valueOf(id/(255*255*255))+"/"+id/(255*255)+".db";
+			return PATH_BEG+String.valueOf((id/(255*255*255))/255)+"/"+String.valueOf(id/(255*255*255))+"/"+id/(255*255)+".db";
 		
 		//We check the main directoy
-		File f = new File("db");
+		File f = new File(PATH_BEG.substring(0, PATH_BEG.length()-1));
 		if(!f.exists())
 			f.mkdir();
 		
 		//We check the main sub-directory (we cannot divide directly by 255*255*255*255 it's too big and we got a negative number)
 		long sub = (id/(255*255*255))/255;
-		f = new File("db/"+String.valueOf(sub));
+		f = new File(PATH_BEG+String.valueOf(sub));
 		if(!f.exists())
 			f.mkdir();
 		
 		//We check the  sub-sub-directory
 		long subsub = id/(255*255*255);
-		f = new File("db/"+String.valueOf(sub)+"/"+String.valueOf(subsub));
+		f = new File(PATH_BEG+String.valueOf(sub)+"/"+String.valueOf(subsub));
 		if(!f.exists())
 			f.mkdir();
 						
 		//Now we can use a file
 		long filename = id/(255*255);
-		f = new File("db/"+String.valueOf(sub)+"/"+String.valueOf(subsub)+"/"+filename+".db");
+		f = new File(PATH_BEG+String.valueOf(sub)+"/"+String.valueOf(subsub)+"/"+filename+".db");
 		if(!f.exists())
 		{
 			//We create the file if not existing
 			PrintWriter writer;
 			try {
-				writer = new PrintWriter("db/"+String.valueOf(sub)+"/"+String.valueOf(subsub)+"/"+filename+".db", "UTF-8");
+				writer = new PrintWriter(PATH_BEG+String.valueOf(sub)+"/"+String.valueOf(subsub)+"/"+filename+".db", "UTF-8");
 				writer.close();
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
@@ -189,7 +191,7 @@ public class Database {
 			}
 		}
 		
-		return "db/"+String.valueOf(sub)+"/"+String.valueOf(subsub)+"/"+filename+".db";
+		return PATH_BEG+String.valueOf(sub)+"/"+String.valueOf(subsub)+"/"+filename+".db";
 	}
 	
 	/**

@@ -13,6 +13,8 @@ public class Main {
 		Controller controller = new Controller(model);
 		Window window = new Window(controller);
 		model.addObserver(window);
-		model.startGame();	// TODO REMOVE
+		
+		for (int i = 0; i < 10000; ++i)
+			model.startGame();	// TODO REMOVE
 	}
 }

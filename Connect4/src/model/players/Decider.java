@@ -25,10 +25,10 @@ public class Decider extends AbstractPlayer implements Subject{
 	@Override
 	public void play() {
 		PseudoState[] states = new PseudoState[Board.WIDTH];
-		int maxValue = 0;
-		int column = 0;
+		int maxValue = -1;
 		int[] heights = getBoard().getHeights();
 		ArrayList<Integer> available = new ArrayList<Integer>();
+		ArrayList<Integer> best = null;
 		this.values = new int[Board.WIDTH];
 
 		// Get all the pseudo states for all the columns.
@@ -37,10 +37,13 @@ public class Decider extends AbstractPlayer implements Subject{
 				getBoard().addCoinInColumn(i, getType());
 				states[i] = PseudoState.getPseudoStateForColumn(i, getBoard());
 				getBoard().removeCoinInColumn(i);
-
-				if (states[i].getValue() >= maxValue) {
+				
+				if (states[i].getValue() > maxValue) {
+					best = new ArrayList<Integer>();
+					best.add(i);
 					maxValue = states[i].getValue();
-					column = i;
+				} else if (states[i].getValue() == maxValue) {
+					best.add(i);
 				}
 				
 				available.add(i);
@@ -50,12 +53,13 @@ public class Decider extends AbstractPlayer implements Subject{
 
 		// Choose one.
 		if (random.nextFloat() >= EPSILON) {
+			int column = best.get(random.nextInt(best.size()));
 			getLearner().newState(states[column]);
 			getBoard().addCoinInColumn(column, getType());
 		} else {
-			int rand = available.get(random.nextInt(available.size()));
-			getLearner().newState(states[rand]);
-			getBoard().addCoinInColumn(rand, getType());
+			int column = available.get(random.nextInt(available.size()));
+			getLearner().newState(states[column]);
+			getBoard().addCoinInColumn(column, getType());
 		}
 		
 		// Notify:

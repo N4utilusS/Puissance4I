@@ -111,12 +111,12 @@ public class Window extends JFrame implements Observer {
 			Decider d = (Decider) o;
 			this.connectPanel.updateTable(d.getState());
 			this.hintPanel.updateHint(d.getValues());
-			try {
-				Thread.sleep(333);
+			/*try {
+				Thread.sleep(50);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
+			}*/
 		}
 	}
 
