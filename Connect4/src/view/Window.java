@@ -64,7 +64,7 @@ public class Window extends JFrame implements Observer {
 		c.gridy = 1;
 		this.mainPanel.add(this.connectPanel, c);
 		
-		this.hintPanel = new HintPanel(this.controller);
+		this.hintPanel = new HintPanel(this.controller, this.getBackground());
 		c.gridy = 2;
 		this.mainPanel.add(this.hintPanel, c);
 		
