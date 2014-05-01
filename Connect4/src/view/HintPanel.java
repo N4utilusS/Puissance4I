@@ -1,5 +1,6 @@
 package view;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -21,8 +22,11 @@ public class HintPanel extends JPanel {
 
 	private Controller controller;
 
-	public HintPanel(Controller controller) {
+	private Color bgColor;
+
+	public HintPanel(Controller controller, Color bgColor) {
 		this.controller = controller;
+		this.bgColor = bgColor;
 		this.setMinimumSize(new Dimension(this.width, 50));
 		this.setPreferredSize(new Dimension(this.width, 50));
 		init();
@@ -35,6 +39,9 @@ public class HintPanel extends JPanel {
 	public void paintComponent(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
 		
+		g.setColor(this.bgColor);
+		g.fillRect(0,0, this.width, this.height);
+		g.setColor(Color.BLACK);
 		for (int i = 0; i < this.hintSize; i++) {
 			g2.drawString(Integer.toString(this.hintValues[i]), this.width / 7 * i + (500 / 14), this.height / 2);
 		}
