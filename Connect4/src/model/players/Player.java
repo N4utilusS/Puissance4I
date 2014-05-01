@@ -7,7 +7,14 @@ import model.learning.PseudoState;
 
 public class Player extends AbstractPlayer implements Subject {
 	
+	public final static int PLAYING = 0;
+	public final static int WON = 1;
+	public final static int LOST = 2;
+	public final static int FILLED = 3;
+	
+	
 	private Observer observer;
+	private int status = PLAYING;
 
 	public Player(int type, Board board, Observer obs) {
 		super(type, board);
@@ -16,7 +23,7 @@ public class Player extends AbstractPlayer implements Subject {
 	}
 	
 	public int[][] getState() {
-		return null;
+		return this.getBoard().getGrid();
 	}
 
 	@Override
@@ -37,9 +44,36 @@ public class Player extends AbstractPlayer implements Subject {
 	}
 	
 	public void setAction(int column) {
+		getBoard().addCoinInColumn(column, getType());
 		PseudoState state = PseudoState.getPseudoStateForColumn(column, getBoard());
 		getLearner().newState(state);
-		getBoard().addCoinInColumn(column, getType());
+	}
+	
+	@Override
+	public void wins() {
+		super.wins();
+		
+		this.status = WON;
+		this.notifyObserver();
+	}
+	
+	@Override
+	public void looses() {
+		super.looses();
+		
+		this.status = LOST;
+		this.notifyObserver();
+	}
+	
+	@Override
+	public void filled() {
+		super.filled();
+		
+		this.status = FILLED;
+		this.notifyObserver();
 	}
 
+	public int getStatus() {
+		return this.status;
+	}
 }

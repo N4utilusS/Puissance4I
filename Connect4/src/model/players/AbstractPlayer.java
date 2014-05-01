@@ -30,4 +30,16 @@ public abstract class AbstractPlayer {
 	public Board getBoard() {
 		return board;
 	}
+	
+	public void wins() {
+		getLearner().ledToWin();
+	}
+	
+	public void looses() {
+		getLearner().ledToLoss();
+	}
+	
+	public void filled() {
+		getLearner().ledToFill();
+	}
 }

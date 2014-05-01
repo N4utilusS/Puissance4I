@@ -25,6 +25,11 @@ public class Board {
 		grid[column][heights[column]] = coinType;
 		heights[column]++;
 	}
+	
+	public void removeCoinInColumn(int column) {
+		grid[column][heights[column]-1] = 0;
+		heights[column]--;
+	}
 
 	public int[][] getGrid() {
 		return grid;
@@ -72,10 +77,10 @@ public class Board {
 		
 		// Diagonals SouthEast
 		for (int j = AMOUNT_TO_WIN; j < Board.HEIGHT; ++j) {
-			for (int i = 0; j - i >= 0; ++i) {
+			for (int i = 0; j - i >= 0 && i < Board.WIDTH; ++i) {
 				if (grid[i][j-i] != type) {
 					count = 0;
-					type = grid[i][j];
+					type = grid[i][j-i];
 				}
 				if (type != 0)
 					count++;
@@ -87,10 +92,10 @@ public class Board {
 		}
 		
 		for (int i = 1; i <= Board.WIDTH-4; ++i) {
-			for (int j = Board.HEIGHT; j >= 0 && i + Board.HEIGHT - j <= Board.WIDTH; --j) {
+			for (int j = Board.HEIGHT; j >= 0 && i + Board.HEIGHT - j < Board.WIDTH; --j) {
 				if (grid[i + Board.HEIGHT - j][j] != type) {
 					count = 0;
-					type = grid[i][j];
+					type = grid[i + Board.HEIGHT - j][j];
 				}
 				if (type != 0)
 					count++;
@@ -102,8 +107,45 @@ public class Board {
 		}
 		
 		// Diagonals NorthEast
+		for (int j = 0; j <= Board.HEIGHT-4; ++j) {
+			for (int i = 0; i < Board.WIDTH && j + i < Board.HEIGHT; ++i) {
+				if (grid[i][j+i] != type) {
+					count = 0;
+					type = grid[i][j+i];
+				}
+				if (type != 0)
+					count++;
+				if (count == AMOUNT_TO_WIN)
+					return true;
+			}
+			
+			count = 0;
+		}
 		
+		for (int i = 1; i <= Board.WIDTH-4; ++i) {
+			for (int j = 0; j < Board.HEIGHT && i + j < Board.WIDTH; ++j) {
+				if (grid[i + j][j] != type) {
+					count = 0;
+					type = grid[i + j][j];
+				}
+				if (type != 0)
+					count++;
+				if (count == AMOUNT_TO_WIN)
+					return true;
+			}
+			
+			count = 0;
+		}
 		
 		return false;
+	}
+	
+	public boolean isFull() {
+		for (int i = 0; i < Board.WIDTH; ++i) {
+			if (this.heights[i] < Board.HEIGHT)
+				return false;
+		}
+		
+		return true;
 	}
 }
