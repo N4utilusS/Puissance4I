@@ -12,6 +12,7 @@ public class Game {
 
 	private AbstractPlayer[] players;
 	private Board board;
+	private byte turn = 0;
 	
 	public Game(int mode, Observer obs){
 		
@@ -19,23 +20,63 @@ public class Game {
 		
 		switch (mode) {
 		case COMPUTER_VS_COMPUTER:
-			this.players[0] = new Decider(1, this.board);
-			this.players[1] = new Decider(2, this.board);
+			this.players[0] = new Decider(1, this.board, obs);
+			this.players[1] = new Decider(2, this.board, obs);
 			break;
 		case HUMAN_VS_COMPUTER:
 			this.players[0] = new Player(1, this.board, obs);
-			this.players[1] = new Decider(2, this.board);
+			this.players[1] = new Decider(2, this.board, obs);
 			break;
 		case COMPUTER_VS_HUMAN:
-			this.players[0] = new Decider(1, this.board);
+			this.players[0] = new Decider(1, this.board, obs);
 			this.players[1] = new Player(2, this.board, obs);
 		}
 		
-		letsPlay();
 	}
 
-	private void letsPlay() {
+	public void letsPlay() {
 		
+		while (!board.gameOver() && !board.isFull()) {
+			players[turn].play();
+			
+			if (players[turn] instanceof Player)
+				return;
+			
+			turn++;
+			if (turn == 2)
+				turn = 0;
+		}
+		
+		// End of game:
+		
+		if (board.isFull()) {
+			players[0].filled();
+			players[1].filled();
+			
+		} else {
+			// Looser is "turn":
+			players[turn].looses();
+			
+			// The other is the winner:
+			turn++;
+			if (turn == 2)
+				turn = 0;
+			players[turn].wins();
+		}
+	}
+	
+	public boolean humanPlayerPlayed(int column) {
+		if (this.board.getHeights()[column] >= Board.HEIGHT)
+			return false;
+		
+		Player p = (Player) players[turn];
+		p.setAction(column);
+		
+		turn++;
+		if (turn == 2)
+			turn = 0;
+		
+		return true;
 	}
 	
 	
