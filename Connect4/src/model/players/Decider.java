@@ -59,11 +59,13 @@ public class Decider extends AbstractPlayer implements Subject{
 		// Choose one.
 		if (random.nextFloat() >= EPSILON) {
 			int column = best.get(random.nextInt(best.size()));
-			getLearner().newState(states[column]);
+			if (getType() == 2)
+				getLearner().newState(states[column]);
 			getBoard().addCoinInColumn(column, getType());
 		} else {
 			int column = available.get(random.nextInt(available.size()));
-			getLearner().newState(states[column]);
+			if (getType() == 2)
+				getLearner().newState(states[column]);
 			getBoard().addCoinInColumn(column, getType());
 		}
 		
