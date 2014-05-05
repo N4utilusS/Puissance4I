@@ -470,7 +470,7 @@ public class Database {
 				 			if(currentId == lineValue)//We are at the right place
 					    	{//We are at the correct place, we can replace the character we just read. We cannot stop the loop anyway
 					    		 current = lineValue;
-					    		 
+
 					    		 //We need to delete the entry now
 					    		 //fileData.remove(lineKey);
 					    		//wl.unlock();
@@ -577,6 +577,7 @@ public class Database {
 			}
 		}
 		
+		buffer = new HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>>();
 		System.out.println("Buffer saved!");
 	}
 	
