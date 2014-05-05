@@ -7,6 +7,7 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseListener;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -166,6 +167,14 @@ public class Window extends JFrame implements Observer, ActionListener {
 
 	public void addListeners() {
 		this.connectPanel.addMouseListener(this.connectPanel);
+	}
+
+	public void removeListeners() {
+		if (this.connectPanel.getMouseListeners() != null) {
+			for (MouseListener l: this.connectPanel.getMouseListeners()) {
+				this.connectPanel.removeMouseListener(l);
+			}
+		}
 	}
 
 }

@@ -39,9 +39,11 @@ public class Controller {
 
 	public void checkActionOnWindow(String actionCommand) {
 		if (Window.NEW_GAME_PLAYER_FIRST.equals(actionCommand)) {
+			this.view.removeListeners();
 			this.view.addListeners();
 			this.model.startGame(Game.HUMAN_VS_COMPUTER);
 		} else if (Window.NEW_GAME_COMPUTER_FIRST.equals(actionCommand)) {
+			this.view.removeListeners();
 			this.view.addListeners();
 			this.model.startGame(Game.COMPUTER_VS_HUMAN);
 		}
