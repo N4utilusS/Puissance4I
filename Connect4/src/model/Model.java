@@ -23,6 +23,12 @@ public class Model implements Subject, Runnable { // TODO Need to implement Subj
 		//database.debug();
 	}
 
+	public void saveDatabase()
+	{
+		database.saveBufferToFiles();
+		//database.end();
+	}
+	
 	@Override
 	public void addObserver(Observer obs) {
 		this.listObserver.add(obs);

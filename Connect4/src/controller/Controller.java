@@ -21,8 +21,10 @@ public class Controller {
 	public void checkActionOnLearnPanel(String actionCommand) {
 		if ("Play".equals(actionCommand)) {
 			this.model.startLearning(-1);
-		} else { //else if("Pause".equals(actionCommand)) {
+		} else { //else if("Pause".equals(actionCommand)) {			
 			this.model.stopLearning();
+			
+			this.model.saveDatabase();
 		}
 	}
 	
