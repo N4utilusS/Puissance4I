@@ -79,8 +79,7 @@ public class Connect4Panel extends JPanel implements MouseListener {
 
 	@Override
 	public void mouseClicked(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
+		this.controller.checkPlayerDecision(arg0.getX() / (this.width / 7));
 	}
 
 	@Override
@@ -103,7 +102,6 @@ public class Connect4Panel extends JPanel implements MouseListener {
 
 	@Override
 	public void mouseReleased(MouseEvent arg0) {
-		this.controller.checkPlayerDecision(arg0.getX() / (this.width / 7));
 	}
 
 }

@@ -1,6 +1,7 @@
 package model;
 
 import model.players.AbstractPlayer;
+import model.players.Adviser;
 import model.players.Decider;
 import model.players.Player;
 import observer.Observer;
@@ -17,6 +18,7 @@ public class Game {
 	private AbstractPlayer[] players;
 	private Board board;
 	private byte turn = 0;
+	private Adviser adviser;
 	
 	/**
 	 * Creates a new game, but does not start it.
@@ -36,11 +38,14 @@ public class Game {
 		case HUMAN_VS_COMPUTER:
 			this.players[0] = new Player(1, this.board, obs);
 			this.players[1] = new Decider(2, this.board, obs);
+			this.adviser = new Adviser(1, this.board, obs);
 			break;
 		case COMPUTER_VS_HUMAN:
 			this.players[0] = new Decider(1, this.board, obs);
 			this.players[1] = new Player(2, this.board, obs);
+			this.adviser = new Adviser(2, this.board, obs);
 		}
+		
 		
 	}
 
@@ -98,6 +103,10 @@ public class Game {
 		letsPlay();
 		
 		return true;
+	}
+
+	public void getAdvise() {
+		this.adviser.play();
 	}
 	
 	

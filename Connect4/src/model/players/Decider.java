@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import model.Board;
+import model.learning.Learner;
 import model.learning.PseudoState;
 import observer.Observer;
 import observer.Subject;
@@ -35,12 +36,20 @@ public class Decider extends AbstractPlayer implements Subject{
 		ArrayList<Integer> available = new ArrayList<Integer>();
 		ArrayList<Integer> best = null;
 		this.values = new int[Board.WIDTH];
+		
+		// To get the learner's experience, we need to reverse the board coins type if the player's type is not the learner's type:
+		Board board;
+		if (getType() == Learner.LEARN_TYPE) {
+			board = getBoard();
+		} else {
+			board = getBoard().reverse();
+		}
 
 		// Get all the pseudo states for all the columns.
 		for (int i = 0; i < Board.WIDTH; ++i) {
 			if (heights[i] < Board.HEIGHT) {
-				getBoard().addCoinInColumn(i, getType());
-				states[i] = PseudoState.getPseudoStateForColumn(i, getBoard());
+				getBoard().addCoinInColumn(i, Learner.LEARN_TYPE);
+				states[i] = PseudoState.getPseudoStateForColumn(i, board);
 				getBoard().removeCoinInColumn(i);
 				
 				if (states[i].getValue() > maxValue) {
@@ -59,13 +68,11 @@ public class Decider extends AbstractPlayer implements Subject{
 		// Choose one.
 		if (random.nextFloat() >= EPSILON) {
 			int column = best.get(random.nextInt(best.size()));
-			if (getType() == 2)
-				getLearner().newState(states[column]);
+			getLearner().newState(states[column]);
 			getBoard().addCoinInColumn(column, getType());
 		} else {
 			int column = available.get(random.nextInt(available.size()));
-			if (getType() == 2)
-				getLearner().newState(states[column]);
+			getLearner().newState(states[column]);
 			getBoard().addCoinInColumn(column, getType());
 		}
 		

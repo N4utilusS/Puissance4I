@@ -99,4 +99,8 @@ public class Model implements Subject, Runnable { // TODO Need to implement Subj
 		else
 			return true;
 	}
+
+	public void getAdvise() {
+		this.game.getAdvise();
+	}
 }

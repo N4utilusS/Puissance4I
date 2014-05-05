@@ -178,4 +178,22 @@ public class Board {
 		
 		return true;
 	}
+
+	public Board reverse() {
+		
+		int[][] grid = new int[WIDTH][HEIGHT];
+		int[] heights = this.heights.clone();
+		
+		for (int i = 0; i < WIDTH; ++i) {
+			for (int j = 0; j < HEIGHT; ++j) {
+				if (this.grid[i][j] == 1) {
+					grid[i][j] = 2;
+				} else if (this.grid[i][j] == 2) {
+					grid[i][j] = 1;
+				}
+			}
+		}
+				
+		return new Board(grid, heights);
+	}
 }

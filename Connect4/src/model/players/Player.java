@@ -3,6 +3,7 @@ package model.players;
 import observer.Observer;
 import observer.Subject;
 import model.Board;
+import model.learning.Learner;
 import model.learning.PseudoState;
 
 /**
@@ -59,9 +60,14 @@ public class Player extends AbstractPlayer implements Subject {
 	 */
 	public void setAction(int column) {
 		getBoard().addCoinInColumn(column, getType());
-		PseudoState state = PseudoState.getPseudoStateForColumn(column, getBoard());
-		if (getType() == 2)
-			getLearner().newState(state);
+		Board board;
+		if (getType() == Learner.LEARN_TYPE) {
+			board = getBoard();
+		} else {
+			board = getBoard().reverse();
+		}
+		PseudoState state = PseudoState.getPseudoStateForColumn(column, board);
+		getLearner().newState(state);
 	}
 	
 	@Override

@@ -1,6 +1,7 @@
 package model.players;
 
 import model.Board;
+import model.learning.Learner;
 import model.learning.PseudoState;
 import observer.Observer;
 import observer.Subject;
@@ -24,12 +25,20 @@ public class Adviser extends AbstractPlayer implements Subject {
 	public void play() {
 		values = new int[Board.WIDTH];
 		int[] heights = getBoard().getHeights();
+		
+		// Reverse the grid if needed to get the correct learned values:
+		Board board;
+		if (getType() == Learner.LEARN_TYPE) {
+			board = getBoard();
+		} else {
+			board = getBoard().reverse();
+		}
 
 		// Get all the pseudo states for all the columns.
 		for (int i = 0; i < Board.WIDTH; ++i) {
 			if (heights[i] < Board.HEIGHT) {
-				getBoard().addCoinInColumn(i, getType());
-				values[i] = PseudoState.getPseudoStateForColumn(i, getBoard()).getValue();
+				getBoard().addCoinInColumn(i, Learner.LEARN_TYPE);
+				values[i] = PseudoState.getPseudoStateForColumn(i, board).getValue();
 				getBoard().removeCoinInColumn(i);
 			}
 		}

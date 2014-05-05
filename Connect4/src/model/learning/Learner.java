@@ -13,6 +13,7 @@ public class Learner {
 	public final static int WINNING_REWARD = 127;
 	public final static int LOOSING_REWARD = 0;
 	public final static int FILLING_REWARD = 63;
+	public final static int LEARN_TYPE = 2;
 
 
 	private PseudoState previousState;

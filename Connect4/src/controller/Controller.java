@@ -1,5 +1,6 @@
 package controller;
 
+import view.P1vsP2Panel;
 import view.Window;
 import model.Game;
 import model.Model;
@@ -48,5 +49,11 @@ public class Controller {
 
 	public void setView(Window window) {
 		this.view = window;
+	}
+
+	public void checkActionOnPlayersPanel(String actionCommand) {
+		if (P1vsP2Panel.ADVISER.equals(actionCommand)) {
+			this.model.getAdvise();
+		}
 	}
 }
