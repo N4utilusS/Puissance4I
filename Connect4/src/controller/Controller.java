@@ -24,7 +24,6 @@ public class Controller {
 		} else { //else if("Pause".equals(actionCommand)) {			
 			this.model.stopLearning();
 			
-			this.model.saveDatabase();
 		}
 	}
 	

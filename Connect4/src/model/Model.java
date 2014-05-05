@@ -87,6 +87,8 @@ public class Model implements Subject, Runnable { // TODO Need to implement Subj
 					break;
 			}
 		}
+		
+		this.saveDatabase();
 	}
 	
 	public int getGamesPlayed() {

@@ -55,23 +55,20 @@ public abstract class AbstractPlayer {
 	 * Must be called when the player wins.
 	 */
 	public void wins() {
-		if (getType() == 2)
-			getLearner().ledToWin();
+		getLearner().ledToWin();
 	}
 	
 	/**
 	 * Must be called when the player looses.
 	 */
 	public void looses() {
-		if (getType() == 2)
-			getLearner().ledToLoss();
+		getLearner().ledToLoss();
 	}
 	
 	/**
 	 * Must be called when the player is equal to the other at the end of the game.
 	 */
 	public void filled() {
-		if (getType() == 2)
-			getLearner().ledToFill();
+		getLearner().ledToFill();
 	}
 }
