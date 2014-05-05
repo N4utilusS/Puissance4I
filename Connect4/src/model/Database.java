@@ -14,16 +14,25 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Database {
 	private int maxStates = 2;
 	private static Charset UTF8 = Charset.forName("UTF-8");
-	private final static String PATH_BEG = "R:/db/";
+	private final static String PATH_BEG = "db/";
 	
+	private ReadWriteLock rwl = new ReentrantReadWriteLock();
+    private Lock rl = rwl.readLock();
+    private Lock wl = rwl.writeLock();
 	private static HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>> buffer;
-	private static final int maxDataInBuffer = 1024*1024*1024;
+	private static final int maxDataInBuffer = 1024*1024*100;
 	private static int numberDataInBuffer = 0;
 	private static final boolean USE_BUFFER = true;
+	
+	private static long startingTime = 0;
+	private static long numberOfGettingSetting = 0;
 	
 	private static Database instance = null;
 	private static Object o = new Object();	
@@ -32,6 +41,16 @@ public class Database {
 		super();
 		
 		buffer = new HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>>();
+		startingTime = System.currentTimeMillis();
+	}
+	
+	public void end()
+	{
+		long endingTime = System.currentTimeMillis();
+		System.out.println("Total time: "+Math.round((endingTime-startingTime)/1000)+"s for "+numberOfGettingSetting+" operations");
+		
+		numberOfGettingSetting = 0;
+		startingTime = System.currentTimeMillis();
 	}
 	
 	/**
@@ -53,9 +72,11 @@ public class Database {
 	 * @param state the state which is a table 5x5
 	 * @param value the new value to save (value between 0 and 255)
 	 */
+	@SuppressWarnings("unused")
 	public void setValue(int state[][], int value)
 	{
 		String path;
+		numberOfGettingSetting++;
 		
 		//Small verification
 		if(value < 0 || value > 127)
@@ -69,20 +90,25 @@ public class Database {
 		
 		//The general id
 		long id = this.createId(state);	
-		
+					
 		//We save the data now
 		if(USE_BUFFER == true)
-		{
+		{			
 			//The path to the file, if we use the buffer, we don't need to ask to check if the file exists here!
 			path = this.path(id, false);
 			this.saveValueToBuffer(path, id, value);
 			
+			if(numberDataInBuffer%10000 == 0)
+				System.out.println("Data in buffer: "+numberDataInBuffer);
+			
 			//We verify if we don't need to save the buffer...
-			if(this.numberDataInBuffer >= this.maxDataInBuffer)
+			if(numberDataInBuffer >= maxDataInBuffer)
 				this.saveBufferToFiles();
 		}
 		else
 		{
+			if(numberOfGettingSetting > 7500000)
+				System.out.println("Arreter le code!");
 			//We directly save the value in the files
 			path = this.path(id, true);
 			this.saveValue(path, id, value);		
@@ -94,10 +120,12 @@ public class Database {
 	 * @param state the state which is a table 5x5
 	 * @return int a value between 0 and 255
 	 */
+	@SuppressWarnings("unused")
 	public int getValue(int state[][])
 	{
 		long id = this.createId(state);		
 		String path = this.path(id, false);
+		numberOfGettingSetting++;
 		
 		if(USE_BUFFER == true)
 		{
@@ -126,6 +154,8 @@ public class Database {
 	 */
 	public void debug()
 	{
+		System.out.println("Max value of a long: "+Long.MAX_VALUE);
+		
 		//For id creation
 		int state[][] = new int[5][5];
 		for(int i=0; i < state.length; i++)
@@ -153,7 +183,7 @@ public class Database {
 		System.out.println("Model, path for "+id1+": "+path1);
 		String path2 = this.path(id2, false);
 		System.out.println("Model, path for "+id2+": "+path2);
-
+				
 		//For saving value
 		path1 = this.path(id1, true);
 		this.saveValue(path1, id1, 25);
@@ -173,6 +203,13 @@ public class Database {
 		System.out.println("Getting value for the id "+id2+": "+this.findValue(path2, id2) + " (using the files directly, so we should have 2 as we previously saved the value 2 in the file)");	
 		this.saveBufferToFiles();
 		System.out.println("Getting value for the id "+id2+": "+this.getValue(state) + " (after saving the buffer manually)");
+		
+		//Getting the value
+		id2 = 2023708051;
+		path2 = this.path(id2, true);
+		this.saveValue(path2, id2, 2);
+		System.out.println("Saving value for the id "+id2+": 2.");
+		
 	}
 	
 	/**
@@ -219,7 +256,7 @@ public class Database {
 		f = new File(PATH_BEG+String.valueOf(sub));
 		if(!f.exists())
 			f.mkdir();
-		
+				
 		//We check the  sub-sub-directory
 		long subsub = id/(255*255*255);
 		f = new File(PATH_BEG+String.valueOf(sub)+"/"+String.valueOf(subsub));
@@ -237,10 +274,8 @@ public class Database {
 				writer = new PrintWriter(PATH_BEG+String.valueOf(sub)+"/"+String.valueOf(subsub)+"/"+filename+".db", "UTF-8");
 				writer.close();
 			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -295,14 +330,12 @@ public class Database {
 				    current = fr.read();
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		    
 		    try {
 				fr.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		} 
@@ -383,16 +416,12 @@ public class Database {
 			    	System.out.println("Impossible to rename the temporary file...");
 				
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		} 
 		catch (FileNotFoundException e) 
 		{			
 			System.out.println("We tried to open the file: "+filename+". But file not found: "+e.getMessage());
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
 		}
 	}
 	
@@ -404,6 +433,7 @@ public class Database {
 	 */
 	private void saveMultipleValues(String filename, HashMap<Integer, Integer> fileData)
 	{
+		//rl.lock();
 		Integer lineValue;
 		Integer lineKey;
 
@@ -420,7 +450,7 @@ public class Database {
 			int current;
 			int history[] = new int[3];	
 		    try {
-		    	int i = 0;
+		    	int i = 0, j=0;
 		    	int currentId = 0;
 
 			    current = fr.read();
@@ -431,7 +461,7 @@ public class Database {
 				    //We check if we are at one line we need to change
 				    if(i == 2)
 				    {				    	
-				    	 currentId = history[0]*255 + history[1];
+				    	currentId = history[0]*255 + history[1];
 				    	 
 				    	 //We check each (id, value) we need to save
 				 		for(Entry<Integer, Integer> lineEntry : fileData.entrySet()) 
@@ -444,7 +474,10 @@ public class Database {
 					    		 current = lineValue;
 					    		 
 					    		 //We need to delete the entry now
-					    		 fileData.remove(lineKey);
+					    		 //fileData.remove(lineKey);
+					    		//wl.unlock();
+					    		 fileData.put(lineKey, -1);
+					    		//wl.lock();
 					    	}
 				 		}
 				 		
@@ -464,10 +497,12 @@ public class Database {
 			 			lineValue = lineEntry.getValue();
 			 			lineKey = lineEntry.getKey();
 			 			
-						//There is a problem if we want to write 57150 (it becomes 63), but not when we write 47150. So, we need two chars to write the id
-						fw.write((int)Math.floor(lineKey/255.0));
-						fw.write(lineKey%255);
-						fw.write(lineValue);
+			 			if(lineValue != -1)
+			 			{
+			 				fw.write((int)Math.floor(lineKey/255.0));
+			 				fw.write(lineKey%255);
+			 				fw.write(lineValue);
+			 			}
 			 		}
 				}
 				
@@ -480,17 +515,16 @@ public class Database {
 			    	System.out.println("Impossible to rename the temporary file...");
 				
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		} 
 		catch (FileNotFoundException e) 
 		{			
 			System.out.println("We tried to open the file: "+filename+". But file not found: "+e.getMessage());
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}		
+		}	
+
+		//wl.unlock();
+       	//rl.unlock();
 	}
 	
 	/**
@@ -502,8 +536,16 @@ public class Database {
 		HashMap<Integer, HashMap<Integer, Integer>> subsub;
 		HashMap<Integer, Integer> fileData;
 		Integer subKey, subsubKey, fileDataKey, lineKey, lineValue;
-		long id = 0;
+		long id=0L, idPart1=0L, idPart2=0L;
 		String path = "";
+		
+		if(USE_BUFFER == false)
+		{
+			System.out.println("No buffer used, all the data are already saved.");
+			return;
+		}
+					
+		System.out.println("Saving buffer...");
 		
 		//We list all the data in the general buffer attribut
 		for(Entry<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>> subEntry : buffer.entrySet()) 
@@ -522,22 +564,22 @@ public class Database {
 					fileDataKey = fileDataEntry.getKey();
 					
 					//We verify first if we the filename already exists (and we create it if not)
-					id = subKey*255*255;
-					id = id*255*255;
+					idPart1 = fileDataKey;
+					idPart1 = idPart1*255;
+					idPart2 = idPart1*255;
+					id = idPart2 + 1;
 					
-					id = id + subsubKey*255*255*255;
-					id = id + fileDataKey*255*255;
+					path = this.path(id, true);
 					
-					this.path(id, true);
-					
-					//We take the path to the current file
-					path = PATH_BEG + String.valueOf(subKey) + "/" + String.valueOf(subsubKey) + "/" + String.valueOf(fileDataKey) + ".db";
+					//System.out.println("Saving values for the file: "+path+" ("+id+") ["+subKey+", "+subsubKey+", "+fileDataKey+"]: "+idPart1+", "+idPart2+", "+id);
 					
 					//We ask to save the different ids and their value in the file
 					this.saveMultipleValues(path, fileData); 
 				}
 			}
 		}
+		
+		System.out.println("Buffer saved!");
 	}
 	
 	/**
@@ -597,7 +639,7 @@ public class Database {
 		Integer second = Integer.valueOf(temp[temp.length-2]);
 		String[] last = temp[temp.length-1].split("\\.");
 		Integer third = Integer.valueOf(last[0]);
-		
+								
 		//The "directories"
 		if(!buffer.containsKey(first))
 			buffer.put(first, new HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>());
