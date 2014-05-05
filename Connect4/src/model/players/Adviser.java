@@ -48,7 +48,7 @@ public class Adviser extends AbstractPlayer implements Subject {
 	}
 	
 	/**
-	 * Called to get the values.
+	 * Called to get the values learned by the learner for the current state.
 	 * @return
 	 */
 	public int[] getValues() {

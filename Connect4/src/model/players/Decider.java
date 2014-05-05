@@ -70,7 +70,7 @@ public class Decider extends AbstractPlayer implements Subject{
 		}
 		
 		// Notify:
-		//this.notifyObserver();
+		this.notifyObserver();
 	}
 	
 	@Override

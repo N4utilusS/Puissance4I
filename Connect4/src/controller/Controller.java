@@ -1,10 +1,13 @@
 package controller;
 
+import view.Window;
+import model.Game;
 import model.Model;
 
 public class Controller {
 	
 	private Model model;
+	private Window view;
 
 	public Controller (Model model) {
 		this.model = model;
@@ -27,6 +30,23 @@ public class Controller {
 	 * @param column the column chosen by the player (0 for the first column, 1 for the second one, ...)
 	 */
 	public void checkPlayerDecision(int column) {
-		System.out.println(column);
+		int temp = Math.min(column, 6);
+		temp = Math.max(0, temp);
+		
+		this.model.humanPlayerPlayed(temp);
+	}
+
+	public void checkActionOnWindow(String actionCommand) {
+		if (Window.NEW_GAME_PLAYER_FIRST.equals(actionCommand)) {
+			this.view.addListeners();
+			this.model.startGame(Game.HUMAN_VS_COMPUTER);
+		} else if (Window.NEW_GAME_COMPUTER_FIRST.equals(actionCommand)) {
+			this.view.addListeners();
+			this.model.startGame(Game.COMPUTER_VS_HUMAN);
+		}
+	}
+
+	public void setView(Window window) {
+		this.view = window;
 	}
 }

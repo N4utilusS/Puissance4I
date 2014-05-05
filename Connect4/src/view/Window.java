@@ -1,15 +1,18 @@
 package view;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.WindowConstants;
@@ -24,8 +27,10 @@ import controller.Controller;
 /**
  * Main window.
  */
-public class Window extends JFrame implements Observer {
+public class Window extends JFrame implements Observer, ActionListener {
 	private static final long serialVersionUID = 1L;
+	public final static String NEW_GAME_PLAYER_FIRST = "New Game Player First";
+	public final static String NEW_GAME_COMPUTER_FIRST = "New Game Computer First";
 	
 	private JPanel mainPanel;
 	private JMenuBar menuBar;
@@ -82,9 +87,16 @@ public class Window extends JFrame implements Observer {
 		JMenu menu = new JMenu("Connect4");
 		menuBar.add(menu);
 		
-		JMenuItem menuItem = new JMenuItem("New Game");
+		JMenuItem menuItem = new JMenuItem(NEW_GAME_PLAYER_FIRST);
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.ALT_MASK));
 		menuItem.getAccessibleContext().setAccessibleDescription("Play a new game!");
+		menuItem.addActionListener(this);
+		menu.add(menuItem);
+		
+		menuItem = new JMenuItem(NEW_GAME_COMPUTER_FIRST);
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.ALT_MASK));
+		menuItem.getAccessibleContext().setAccessibleDescription("Play a new game!");
+		menuItem.addActionListener(this);
 		menu.add(menuItem);
 		
 		menuItem = new JMenuItem("Save");
@@ -105,14 +117,37 @@ public class Window extends JFrame implements Observer {
 	@Override
 	public void update(Object o) {
 		if (o instanceof Player) {
-			this.connectPanel.updateTable(((Player) o).getState());
+			Player p = (Player) o;
+			this.connectPanel.updateTable(p.getState());
+			this.hintPanel.setBackground(Color.BLACK);
+			this.hintPanel.repaint();
+			if (p.getStatus() != Player.PLAYING) {
+				String message;
+				if (p.getStatus() == Player.WON) {
+					message = "YOU WIN!";
+				} else if (p.getStatus() == Player.LOST) {
+					message = "YOU LOOSE!";
+				} else {
+					message = "NOBODY WINS!";
+				}
+				
+				JOptionPane.showMessageDialog(this,
+					    message,
+					    "GameOver",
+					    JOptionPane.INFORMATION_MESSAGE);
+				this.connectPanel.removeMouseListener(this.connectPanel.getMouseListeners()[0]);
+			}
 		} else if (o instanceof Adviser) {
 			this.hintPanel.updateHint(((Adviser) o).getValues());
+			this.hintPanel.setBackground(Color.GREEN);
+			this.hintPanel.repaint();
 		} else if (o instanceof Decider) {
 			Decider d = (Decider) o;
 			this.connectPanel.updateTable(d.getState());
 			this.hintPanel.updateHint(d.getValues());
-			
+			this.hintPanel.setBackground(Color.RED);
+			this.hintPanel.repaint();
+
 			/*try {
 				Thread.sleep(50);
 			} catch (InterruptedException e) {
@@ -122,6 +157,15 @@ public class Window extends JFrame implements Observer {
 		} else if (o instanceof Model) {
 			this.learnPanel.setNbOfGamesPlayed(((Model) o).getGamesPlayed());
 		}
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		this.controller.checkActionOnWindow(e.getActionCommand());
+	}
+
+	public void addListeners() {
+		this.connectPanel.addMouseListener(this.connectPanel);
 	}
 
 }

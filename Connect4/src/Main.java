@@ -12,6 +12,7 @@ public class Main {
 		Model model = new Model();
 		Controller controller = new Controller(model);
 		Window window = new Window(controller);
+		controller.setView(window);
 		model.addObserver(window);
 	}
 }

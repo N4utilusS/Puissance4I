@@ -60,7 +60,8 @@ public class Player extends AbstractPlayer implements Subject {
 	public void setAction(int column) {
 		getBoard().addCoinInColumn(column, getType());
 		PseudoState state = PseudoState.getPseudoStateForColumn(column, getBoard());
-		getLearner().newState(state);
+		if (getType() == 2)
+			getLearner().newState(state);
 	}
 	
 	@Override

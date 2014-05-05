@@ -2,6 +2,8 @@ package model;
 
 import java.util.ArrayList;
 
+import model.players.Player;
+
 import observer.Observer;
 import observer.Subject;
 
@@ -12,6 +14,8 @@ public class Model implements Subject, Runnable { // TODO Need to implement Subj
 	private boolean continueLearning = true;
 	private int amountOfGamesToLearn = 0;
 	private int gamesPlayed = 0;
+	private Game game;
+	private int mode;
 	
 	public Model()
 	{
@@ -31,7 +35,8 @@ public class Model implements Subject, Runnable { // TODO Need to implement Subj
 	}
 	
 	public void startGame(int mode) {
-		Game game = new Game(mode, this.listObserver.get(0));
+		game = new Game(mode, this.listObserver.get(0));
+		this.mode = mode;
 		game.letsPlay();
 	}
 	
@@ -50,6 +55,8 @@ public class Model implements Subject, Runnable { // TODO Need to implement Subj
 		this.continueLearning = true;
 		if (amountOfGames <= 0)
 			this.amountOfGamesToLearn = -1;
+		else
+			this.amountOfGamesToLearn = amountOfGames;
 		this.learningThread.start();
 	}
 	
@@ -78,5 +85,18 @@ public class Model implements Subject, Runnable { // TODO Need to implement Subj
 	
 	public int getGamesPlayed() {
 		return this.gamesPlayed;
+	}
+	
+	/**
+	 * Called by the view after the human player has played,
+	 * so his action is taken into account, and the game can continue.
+	 * @param column The column played.
+	 * @return
+	 */
+	public boolean humanPlayerPlayed(int column) {
+		if (this.game != null && this.mode != Game.COMPUTER_VS_COMPUTER)
+			return game.humanPlayerPlayed(column);
+		else
+			return true;
 	}
 }
