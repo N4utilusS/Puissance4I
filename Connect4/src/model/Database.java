@@ -12,19 +12,26 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map.Entry;
 
 public class Database {
 	private int maxStates = 2;
 	private static Charset UTF8 = Charset.forName("UTF-8");
+	private final static String PATH_BEG = "R:/db/";
+	
+	private static HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>> buffer;
+	private static final int maxDataInBuffer = 1024*1024*1024;
+	private static int numberDataInBuffer = 0;
+	private static final boolean USE_BUFFER = true;
 	
 	private static Database instance = null;
-	private static Object o = new Object();
-	
-	private final static String PATH_BEG = "db/";
-	
+	private static Object o = new Object();	
 
 	private Database(){
 		super();
+		
+		buffer = new HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>>();
 	}
 	
 	/**
@@ -48,6 +55,8 @@ public class Database {
 	 */
 	public void setValue(int state[][], int value)
 	{
+		String path;
+		
 		//Small verification
 		if(value < 0 || value > 127)
 		{
@@ -57,10 +66,27 @@ public class Database {
 			else if(value > 127)
 				value = 127;
 		}
-
-		long id = this.createId(state);		
-		String path = this.path(id, true);
-		this.saveValue(path, id, value);
+		
+		//The general id
+		long id = this.createId(state);	
+		
+		//We save the data now
+		if(USE_BUFFER == true)
+		{
+			//The path to the file, if we use the buffer, we don't need to ask to check if the file exists here!
+			path = this.path(id, false);
+			this.saveValueToBuffer(path, id, value);
+			
+			//We verify if we don't need to save the buffer...
+			if(this.numberDataInBuffer >= this.maxDataInBuffer)
+				this.saveBufferToFiles();
+		}
+		else
+		{
+			//We directly save the value in the files
+			path = this.path(id, true);
+			this.saveValue(path, id, value);		
+		}
 	}
 	
 	/**
@@ -72,7 +98,27 @@ public class Database {
 	{
 		long id = this.createId(state);		
 		String path = this.path(id, false);
-		return this.findValue(path, id);		
+		
+		if(USE_BUFFER == true)
+		{
+			int value = this.findValueInBuffer(path, id);
+			
+			//if value not found, maybe the buffer didn't get it, so we need to verify if there is not already a file with the data
+			if(value == -1)
+			{
+				value = this.findValue(path, id);
+				
+				//Even if we got 0 (which means 'no data' or simply '0') we save it into the buffer to avoid needing to open the associated file next time... The db increases faster, but the setValue() will be faster too
+				this.saveValueToBuffer(path, id, 0);				
+			}			
+			
+			//As simply as that
+			return value;
+		}
+		else
+		{
+			return this.findValue(path, id);		
+		}
 	}
 	
 	/**
@@ -111,14 +157,22 @@ public class Database {
 		//For saving value
 		path1 = this.path(id1, true);
 		this.saveValue(path1, id1, 25);
-		System.out.println("Saving value for the id "+id1+".");
+		System.out.println("Saving value for the id "+id1+": 25.");
 		path2 = this.path(id2, true);
 		this.saveValue(path2, id2, 2);
-		System.out.println("Saving value for the id "+id2+".");
+		System.out.println("Saving value for the id "+id2+": 2.");
 				
 		//For getting value
 		System.out.println("Getting the value for the id "+id1+": "+this.findValue(path1, id1));
 		System.out.println("Getting the value for the id "+id2+": "+this.findValue(path2, id2));
+		
+		//General setValue() and getValue()
+		System.out.println("Setting value for the id "+id2+": 13.");
+		this.setValue(state, 13);
+		System.out.println("Getting value for the id "+id2+": "+this.getValue(state) + " (before saving the buffer, if USE_BUFFER = true)");	
+		System.out.println("Getting value for the id "+id2+": "+this.findValue(path2, id2) + " (using the files directly, so we should have 2 as we previously saved the value 2 in the file)");	
+		this.saveBufferToFiles();
+		System.out.println("Getting value for the id "+id2+": "+this.getValue(state) + " (after saving the buffer manually)");
 	}
 	
 	/**
@@ -340,5 +394,233 @@ public class Database {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Saves multiples values in a file
+	 * @param filename 
+	 * @param fileData
+	 * @return void
+	 */
+	private void saveMultipleValues(String filename, HashMap<Integer, Integer> fileData)
+	{
+		Integer lineValue;
+		Integer lineKey;
+
+		//We open the file
+		try 
+		{			
+			File file = new File(filename);
+		    Reader fr = new InputStreamReader(new FileInputStream(filename), UTF8);
+	        
+		    File tempFile = new File("buffer");
+		    Writer fw = new OutputStreamWriter(new FileOutputStream("buffer"), UTF8);	
+
+			//We read the file
+			int current;
+			int history[] = new int[3];	
+		    try {
+		    	int i = 0;
+		    	int currentId = 0;
+
+			    current = fr.read();
+				while(current != -1)
+				{
+				    history[i] = current;
+				    
+				    //We check if we are at one line we need to change
+				    if(i == 2)
+				    {				    	
+				    	 currentId = history[0]*255 + history[1];
+				    	 
+				    	 //We check each (id, value) we need to save
+				 		for(Entry<Integer, Integer> lineEntry : fileData.entrySet()) 
+				 		{
+				 			lineValue = lineEntry.getValue();
+				 			lineKey = lineEntry.getKey();
+				 			
+				 			if(currentId == lineValue)//We are at the right place
+					    	{//We are at the correct place, we can replace the character we just read. We cannot stop the loop anyway
+					    		 current = lineValue;
+					    		 
+					    		 //We need to delete the entry now
+					    		 fileData.remove(lineKey);
+					    	}
+				 		}
+				 		
+				    }
+				    
+					fw.write(current);
+				    
+				    i = (i+1)%3;	
+				    current = fr.read();
+				}
+				
+				//If some values were not found in the file, we add them now
+				if(fileData.size() > 0)
+				{
+					for(Entry<Integer, Integer> lineEntry : fileData.entrySet()) 
+			 		{
+			 			lineValue = lineEntry.getValue();
+			 			lineKey = lineEntry.getKey();
+			 			
+						//There is a problem if we want to write 57150 (it becomes 63), but not when we write 47150. So, we need two chars to write the id
+						fw.write((int)Math.floor(lineKey/255.0));
+						fw.write(lineKey%255);
+						fw.write(lineValue);
+			 		}
+				}
+				
+				//Now we replace the file
+				fw.close();
+				fr.close();
+				if(!file.delete())
+					System.out.println("Impossible to delete the old file...");
+			    if(!tempFile.renameTo(file))
+			    	System.out.println("Impossible to rename the temporary file...");
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} 
+		catch (FileNotFoundException e) 
+		{			
+			System.out.println("We tried to open the file: "+filename+". But file not found: "+e.getMessage());
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}		
+	}
+	
+	/**
+	 * Saves the entire buffer
+	 */
+	public void saveBufferToFiles()
+	{
+		HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>> sub;
+		HashMap<Integer, HashMap<Integer, Integer>> subsub;
+		HashMap<Integer, Integer> fileData;
+		Integer subKey, subsubKey, fileDataKey, lineKey, lineValue;
+		long id = 0;
+		String path = "";
+		
+		//We list all the data in the general buffer attribut
+		for(Entry<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>> subEntry : buffer.entrySet()) 
+		{			
+			sub = subEntry.getValue();
+			subKey = subEntry.getKey();
+			
+			for(Entry<Integer, HashMap<Integer, HashMap<Integer, Integer>>> subsubEntry : sub.entrySet()) 
+			{
+				subsub = subsubEntry.getValue();
+				subsubKey = subsubEntry.getKey();
+				
+				for(Entry<Integer, HashMap<Integer, Integer>> fileDataEntry : subsub.entrySet()) 
+				{
+					fileData = fileDataEntry.getValue();
+					fileDataKey = fileDataEntry.getKey();
+					
+					//We verify first if we the filename already exists (and we create it if not)
+					id = subKey*255*255;
+					id = id*255*255;
+					
+					id = id + subsubKey*255*255*255;
+					id = id + fileDataKey*255*255;
+					
+					this.path(id, true);
+					
+					//We take the path to the current file
+					path = PATH_BEG + String.valueOf(subKey) + "/" + String.valueOf(subsubKey) + "/" + String.valueOf(fileDataKey) + ".db";
+					
+					//We ask to save the different ids and their value in the file
+					this.saveMultipleValues(path, fileData); 
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Gets the value of a id from the buffer. Returns -1 (and NOT 0) if nothing found, this is important!
+	 * @param filename
+	 * @param id
+	 * @return int or -1 if not found
+	 */
+	private int findValueInBuffer(String filename, long id)
+	{
+		Integer idIntoFile = (int) (id % (255*255));
+		
+		String temp[] = filename.split("/");
+		
+		Integer first = Integer.valueOf(temp[temp.length-3]);
+		Integer second = Integer.valueOf(temp[temp.length-2]);
+		String[] last = temp[temp.length-1].split("\\.");
+		Integer third = Integer.valueOf(last[0]);
+		
+		//The "directories"
+		if(!buffer.containsKey(first))
+			return -1;
+		
+		HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>> sub = buffer.get(first);
+		
+		if(!sub.containsKey(second))
+			return -1;
+		
+		HashMap<Integer, HashMap<Integer, Integer>> subsub = sub.get(second);
+		
+		if(!subsub.containsKey(third))
+			return -1;
+		
+		//The "file"
+		HashMap<Integer, Integer> fileData = subsub.get(third);
+		
+		if(fileData.containsKey(idIntoFile))
+			return fileData.get(idIntoFile);
+		
+		//Nothing found.
+		return -1;
+	}
+	
+	/**
+	 * Save the value of a id into a buffer
+	 * @param filename
+	 * @param id
+	 * @param value
+	 */
+	private void saveValueToBuffer(String filename, long id, int value)
+	{
+		Integer idIntoFile = (int) (id % (255*255));
+		
+		String temp[] = filename.split("/");
+		
+		Integer first = Integer.valueOf(temp[temp.length-3]);
+		Integer second = Integer.valueOf(temp[temp.length-2]);
+		String[] last = temp[temp.length-1].split("\\.");
+		Integer third = Integer.valueOf(last[0]);
+		
+		//The "directories"
+		if(!buffer.containsKey(first))
+			buffer.put(first, new HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>());
+		
+		HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>> sub = buffer.get(first);
+		
+		if(!sub.containsKey(second))
+			sub.put(second, new HashMap<Integer, HashMap<Integer, Integer>>());
+		
+		HashMap<Integer, HashMap<Integer, Integer>> subsub = sub.get(second);
+		
+		if(!subsub.containsKey(third))
+			subsub.put(third, new HashMap<Integer, Integer>());
+		
+		//The "file"
+		HashMap<Integer, Integer> fileData = subsub.get(third);
+		
+		if(!fileData.containsKey(third))
+			numberDataInBuffer++;
+		
+		//We save the data
+		fileData.put(idIntoFile, value);
+		
+		//TODO : vérifier si c'est bien des références vers les objets qu'on obtient, et donc qu'il ne faut pas "putter" tout à l'envers ici :/
 	}
 }
