@@ -98,8 +98,8 @@ public class Database {
 			path = this.path(id, false);
 			this.saveValueToBuffer(path, id, value);
 			
-			if(numberDataInBuffer%10000 == 0)
-				System.out.println("Data in buffer: "+numberDataInBuffer);
+			//if(numberDataInBuffer%10000 == 0)
+			//	System.out.println("Data in buffer: "+numberDataInBuffer);
 			
 			//We verify if we don't need to save the buffer...
 			if(numberDataInBuffer >= maxDataInBuffer)
@@ -107,8 +107,6 @@ public class Database {
 		}
 		else
 		{
-			if(numberOfGettingSetting > 7500000)
-				System.out.println("Arreter le code!");
 			//We directly save the value in the files
 			path = this.path(id, true);
 			this.saveValue(path, id, value);		
