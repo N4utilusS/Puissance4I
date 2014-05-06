@@ -37,6 +37,10 @@ public class HintPanel extends JPanel {
 	public void paintComponent(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
 		
+		//Background
+		g2.setColor(new Color(237,237,237));
+		g2.fillRect(0, 0, this.getWidth(), this.getHeight());
+		
 		g2.setColor(Color.BLACK);
 		for (int i = 0; i < this.hintSize; i++) {
 			g2.drawString(Integer.toString(this.hintValues[i]), this.width / 7 * i + (500 / 14), this.height / 2);
