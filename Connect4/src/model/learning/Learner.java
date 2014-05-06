@@ -14,6 +14,7 @@ public class Learner {
 	public final static int LOOSING_REWARD = 0;
 	public final static int FILLING_REWARD = 63;
 	public final static int LEARN_TYPE = 2;
+	public final static int OTHER_TYPE = 1;	
 
 
 	private PseudoState previousState;
@@ -37,8 +38,8 @@ public class Learner {
 	 * Simulates the addition of a new state with victory reward.
 	 */
 	public void ledToWin() {
-		int value = Math.round(this.previousState.getValue() + ALPHA * (GAMMA * WINNING_REWARD - this.previousState.getValue()));
-		Database.getInstance().setValue(this.previousState.getGrid(), value);
+		Database.getInstance().setValue(this.previousState.getGrid(), WINNING_REWARD);
+		System.out.println("win");
 	}
 	
 	/**
@@ -46,8 +47,9 @@ public class Learner {
 	 * Simulates the addition of a new state with loss reward.
 	 */
 	public void ledToLoss() {
-		int value = Math.round(this.previousState.getValue() + ALPHA * (GAMMA * LOOSING_REWARD - this.previousState.getValue()));
+		int value = Math.round(this.previousState.getValue() + ALPHA * (LOOSING_REWARD - this.previousState.getValue()));
 		Database.getInstance().setValue(this.previousState.getGrid(), value);
+		System.out.println("loss");
 	}
 	
 	/**
@@ -55,7 +57,7 @@ public class Learner {
 	 * Simulates the addition of a new state with equality reward.
 	 */
 	public void ledToFill() {
-		int value = Math.round(this.previousState.getValue() + ALPHA * (GAMMA * FILLING_REWARD - this.previousState.getValue()));
+		int value = Math.round(this.previousState.getValue() + ALPHA * (FILLING_REWARD - this.previousState.getValue()));
 		Database.getInstance().setValue(this.previousState.getGrid(), value);
 	}
 }

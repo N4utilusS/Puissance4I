@@ -38,19 +38,24 @@ public class Decider extends AbstractPlayer implements Subject{
 		this.values = new int[Board.WIDTH];
 		
 		// To get the learner's experience, we need to reverse the board coins type if the player's type is not the learner's type:
-		Board board;
+		Board board, boardOther;
 		if (getType() == Learner.LEARN_TYPE) {
 			board = getBoard();
+			boardOther = getBoard().reverse();
 		} else {
 			board = getBoard().reverse();
+			boardOther = getBoard();
 		}
 
 		// Get all the pseudo states for all the columns.
 		for (int i = 0; i < Board.WIDTH; ++i) {
 			if (heights[i] < Board.HEIGHT) {
-				getBoard().addCoinInColumn(i, Learner.LEARN_TYPE);
+				board.addCoinInColumn(i, Learner.LEARN_TYPE);
 				states[i] = PseudoState.getPseudoStateForColumn(i, board);
-				getBoard().removeCoinInColumn(i);
+				board.removeCoinInColumn(i);
+				
+				
+				
 				
 				if (states[i].getValue() > maxValue) {
 					best = new ArrayList<Integer>();

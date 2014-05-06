@@ -59,4 +59,8 @@ public class Controller {
 			this.model.getAdvise();
 		}
 	}
+
+	public void saveToDB() {
+		this.model.saveDatabase();
+	}
 }

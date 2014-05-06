@@ -8,6 +8,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -28,7 +30,7 @@ import controller.Controller;
 /**
  * Main window.
  */
-public class Window extends JFrame implements Observer, ActionListener {
+public class Window extends JFrame implements Observer, ActionListener, WindowListener {
 	private static final long serialVersionUID = 1L;
 	public final static String NEW_GAME_PLAYER_FIRST = "New Game Player First";
 	public final static String NEW_GAME_COMPUTER_FIRST = "New Game Computer First";
@@ -48,7 +50,8 @@ public class Window extends JFrame implements Observer, ActionListener {
 		init();
 		this.setTitle("Connect 4");
 		this.pack();
-		this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		this.addWindowListener(this);
 		this.setMinimumSize(new Dimension(700,500));
 		//this.setExtendedState(MAXIMIZED_BOTH);
 		this.setResizable(false);
@@ -120,7 +123,7 @@ public class Window extends JFrame implements Observer, ActionListener {
 		if (o instanceof Player) {
 			Player p = (Player) o;
 			this.connectPanel.updateTable(p.getState());
-			this.hintPanel.setBackground(Color.BLACK);
+			//this.hintPanel.setBackground(Color.BLACK);
 			this.hintPanel.repaint();
 			if (p.getStatus() != Player.PLAYING) {
 				String message;
@@ -140,13 +143,13 @@ public class Window extends JFrame implements Observer, ActionListener {
 			}
 		} else if (o instanceof Adviser) {
 			this.hintPanel.updateHint(((Adviser) o).getValues());
-			this.hintPanel.setBackground(Color.GREEN);
+			//this.hintPanel.setBackground(Color.GREEN);
 			this.hintPanel.repaint();
 		} else if (o instanceof Decider) {
 			Decider d = (Decider) o;
 			this.connectPanel.updateTable(d.getState());
 			this.hintPanel.updateHint(d.getValues());
-			this.hintPanel.setBackground(Color.RED);
+			//this.hintPanel.setBackground(Color.RED);
 			this.hintPanel.repaint();
 
 			/*try {
@@ -175,6 +178,47 @@ public class Window extends JFrame implements Observer, ActionListener {
 				this.connectPanel.removeMouseListener(l);
 			}
 		}
+	}
+
+	@Override
+	public void windowActivated(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowClosed(WindowEvent arg0) {
+		System.exit(0);
+	}
+
+	@Override
+	public void windowClosing(WindowEvent arg0) {
+		this.controller.saveToDB();
+		this.dispose();
+	}
+
+	@Override
+	public void windowDeactivated(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowDeiconified(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowIconified(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void windowOpened(WindowEvent arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
