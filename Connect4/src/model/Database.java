@@ -578,6 +578,7 @@ public class Database {
 		}
 		
 		buffer = new HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>>();
+		numberDataInBuffer = 0;
 		System.out.println("Buffer saved!");
 	}
 	
