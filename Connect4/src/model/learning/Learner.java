@@ -38,8 +38,8 @@ public class Learner {
 	 * Simulates the addition of a new state with victory reward.
 	 */
 	public void ledToWin() {
-		Database.getInstance().setValue(this.previousState.getGrid(), WINNING_REWARD);
-		System.out.println("win");
+		int value = Math.round(this.previousState.getValue() + ALPHA * (WINNING_REWARD - this.previousState.getValue()));
+		Database.getInstance().setValue(this.previousState.getGrid(), value);
 	}
 	
 	/**
@@ -49,7 +49,6 @@ public class Learner {
 	public void ledToLoss() {
 		int value = Math.round(this.previousState.getValue() + ALPHA * (LOOSING_REWARD - this.previousState.getValue()));
 		Database.getInstance().setValue(this.previousState.getGrid(), value);
-		System.out.println("loss");
 	}
 	
 	/**

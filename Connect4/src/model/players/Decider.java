@@ -50,23 +50,30 @@ public class Decider extends AbstractPlayer implements Subject{
 		// Get all the pseudo states for all the columns.
 		for (int i = 0; i < Board.WIDTH; ++i) {
 			if (heights[i] < Board.HEIGHT) {
+				
+				// Normal move choice:
 				board.addCoinInColumn(i, Learner.LEARN_TYPE);
 				states[i] = PseudoState.getPseudoStateForColumn(i, board);
 				board.removeCoinInColumn(i);
 				
+				values[i] = states[i].getValue();
+
+				// Prevention move detection, put yourself into ennemie's mind:
+				boardOther.addCoinInColumn(i, Learner.LEARN_TYPE);
+				int preventionValue = PseudoState.getPseudoStateForColumn(i, boardOther).getValue()-1;	// -1 because attack has higher priority on defense.
+				values[i] = Math.max(values[i], preventionValue);	// Remember the best value.
+				boardOther.removeCoinInColumn(i);
 				
-				
-				
-				if (states[i].getValue() > maxValue) {
+				// Best actions management:
+				if (values[i] > maxValue) {
 					best = new ArrayList<Integer>();
 					best.add(i);
-					maxValue = states[i].getValue();
-				} else if (states[i].getValue() == maxValue) {
+					maxValue = values[i];
+				} else if (values[i] == maxValue) {
 					best.add(i);
 				}
 				
 				available.add(i);
-				values[i] = states[i].getValue();
 			}
 		}
 
