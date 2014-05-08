@@ -21,7 +21,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class Database {
 	private int maxStates = 2;
 	private static Charset UTF8 = Charset.forName("UTF-8");
-	private final static String PATH_BEG = "R:/db/";
+	private final static String PATH_BEG = "db/";
 	
 	private ReadWriteLock rwl = new ReentrantReadWriteLock();
     private Lock rl = rwl.readLock();
