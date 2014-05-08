@@ -26,13 +26,19 @@ public class Database {
 	private ReadWriteLock rwl = new ReentrantReadWriteLock();
     private Lock rl = rwl.readLock();
     private Lock wl = rwl.writeLock();
-	private static HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>> buffer;
-	private static final int maxDataInBuffer = 1024*1024*100;
+	private long[] classicComputations;
+	private int[][] basicComputations;
+	private static HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>>> buffer;
+	
+	private static final int maxDataInBuffer = 1024*1024*250;
 	private static int numberDataInBuffer = 0;
 	private static final boolean USE_BUFFER = true;
 	
 	private static long startingTime = 0;
+	private static long specificTime = 0;
 	private static long numberOfGettingSetting = 0;
+	
+	private static boolean checkFiles = true;
 	
 	private static Database instance = null;
 	private static Object o = new Object();	
@@ -40,14 +46,19 @@ public class Database {
 	private Database(){
 		super();
 		
-		buffer = new HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>>();
+		buffer = new HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>>>();
 		startingTime = System.currentTimeMillis();
+		this.initComputations();
+		
+		File db = new File(PATH_BEG);
+		this.checkFiles = db.exists();
 	}
 	
 	public void end()
 	{
 		long endingTime = System.currentTimeMillis();
 		System.out.println("Total time: "+Math.round((endingTime-startingTime)/1000)+"s for "+numberOfGettingSetting+" operations");
+		System.out.println("Specific time: "+Math.round(specificTime/1000000)+"ms for "+numberOfGettingSetting+" operations");
 		
 		numberOfGettingSetting = 0;
 		startingTime = System.currentTimeMillis();
@@ -77,6 +88,7 @@ public class Database {
 	{
 		String path;
 		numberOfGettingSetting++;
+		long start = System.nanoTime();
 		
 		//Small verification
 		if(value < 0 || value > 127)
@@ -111,6 +123,7 @@ public class Database {
 			path = this.path(id, true);
 			this.saveValue(path, id, value);		
 		}
+		specificTime += (System.nanoTime() - start);	
 	}
 	
 	/**
@@ -124,6 +137,7 @@ public class Database {
 		long id = this.createId(state);		
 		String path = this.path(id, false);
 		numberOfGettingSetting++;
+		long start = System.nanoTime();
 		
 		if(USE_BUFFER == true)
 		{
@@ -132,17 +146,24 @@ public class Database {
 			//if value not found, maybe the buffer didn't get it, so we need to verify if there is not already a file with the data
 			if(value == -1)
 			{
-				value = this.findValue(path, id);
+				if(this.checkFiles == false)
+					return 0;
+				else
+				{
+					value = this.findValue(path, id);
 				
-				//Even if we got 0 (which means 'no data' or simply '0') we save it into the buffer to avoid needing to open the associated file next time... The db increases faster, but the setValue() will be faster too
-				this.saveValueToBuffer(path, id, 0);				
+					//Even if we got 0 (which means 'no data' or simply '0') we save it into the buffer to avoid needing to open the associated file next time... The db increases faster, but the setValue() will be faster too
+					this.saveValueToBuffer(path, id, 0);			
+				}
 			}			
 			
 			//As simply as that
+			specificTime += (System.nanoTime() - start);	
 			return value;
 		}
 		else
 		{
+			specificTime += (System.nanoTime() - start);	
 			return this.findValue(path, id);		
 		}
 	}
@@ -211,6 +232,23 @@ public class Database {
 	}
 	
 	/**
+	 * Pre-computes some values for the ids buffer
+	 */
+	private void initComputations()
+	{
+		int j=0;
+		
+		classicComputations = new long[5];
+		for(j=0; j < 5; j++)
+			classicComputations[j] = (long)(Math.pow(242+1, j));
+		
+		basicComputations = new int[5][3];
+		for(j=0; j < 5; j++)
+			for(int k=0; k < 3; k++)
+				basicComputations[j][k] = (int) (k * (Math.pow(this.maxStates+1, j)));
+	}
+	
+	/**
 	 * Creates the id for a given state
 	 * @param state
 	 * @return long 
@@ -218,15 +256,20 @@ public class Database {
 	private long createId(int state[][])
 	{
 		long id = 0;
-		int temp = 0;
+		int i=0, temp=0, j=0;
+
+		for( ; i < 5; i++)
+			id += (basicComputations[0][state[i][0]] + basicComputations[1][state[i][1]] + basicComputations[2][state[i][2]] + basicComputations[3][state[i][3]] + basicComputations[4][state[i][4]]) * classicComputations[i];
 		
-		for(int i=0; i < state.length; i++)
+		/* Initial algo:
+		int temp=0, j;
+		for( ; i < 5; i++, temp=0)
 		{
-			temp = 0;
-			for(int j=0; j < state[i].length; j++)
+			for(j=0; j < 5; j++)
 				temp += state[i][j] * Math.pow(this.maxStates+1, j);
 			id += temp * Math.pow(242+1, i);//2*3^0 + 2*3^1 + 2*3^2 + 2*3^3 + 2*3^4 = 242.
 		}
+		//*/
 		
 		return id;
 	}
@@ -530,10 +573,12 @@ public class Database {
 	 */
 	public void saveBufferToFiles()
 	{
-		HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>> sub;
-		HashMap<Integer, HashMap<Integer, Integer>> subsub;
+		HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>> sub;
+		HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>> subsub;
+		HashMap<Integer, HashMap<Integer, Integer>> intermediaryFileData;
 		HashMap<Integer, Integer> fileData;
-		Integer subKey, subsubKey, fileDataKey, lineKey, lineValue;
+		HashMap<Integer, Integer> data;
+		Integer subKey, subsubKey, intermediaryFileDataKey, fileDataKey, lineKey, lineValue;
 		long id=0L, idPart1=0L, idPart2=0L;
 		String path = "";
 		
@@ -546,38 +591,50 @@ public class Database {
 		System.out.println("Saving buffer...");
 		
 		//We list all the data in the general buffer attribut
-		for(Entry<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>> subEntry : buffer.entrySet()) 
+		for(Entry<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>>> subEntry : buffer.entrySet()) 
 		{			
 			sub = subEntry.getValue();
 			subKey = subEntry.getKey();
 			
-			for(Entry<Integer, HashMap<Integer, HashMap<Integer, Integer>>> subsubEntry : sub.entrySet()) 
+			for(Entry<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>> subsubEntry : sub.entrySet()) 
 			{
 				subsub = subsubEntry.getValue();
 				subsubKey = subsubEntry.getKey();
 				
-				for(Entry<Integer, HashMap<Integer, Integer>> fileDataEntry : subsub.entrySet()) 
+				for(Entry<Integer, HashMap<Integer, HashMap<Integer, Integer>>> intermediaryFileDataEntry : subsub.entrySet()) 
 				{
-					fileData = fileDataEntry.getValue();
-					fileDataKey = fileDataEntry.getKey();
+					intermediaryFileData = intermediaryFileDataEntry.getValue();
+					intermediaryFileDataKey = intermediaryFileDataEntry.getKey();
 					
-					//We verify first if we the filename already exists (and we create it if not)
-					idPart1 = fileDataKey;
-					idPart1 = idPart1*255;
-					idPart2 = idPart1*255;
-					id = idPart2 + 1;
+					fileDataKey = 0;
 					
-					path = this.path(id, true);
-					
-					//System.out.println("Saving values for the file: "+path+" ("+id+") ["+subKey+", "+subsubKey+", "+fileDataKey+"]: "+idPart1+", "+idPart2+", "+id);
-					
-					//We ask to save the different ids and their value in the file
-					this.saveMultipleValues(path, fileData); 
+					//We need to know which file is concerned
+					for(Entry<Integer, HashMap<Integer, Integer>> fileDataEntry : intermediaryFileData.entrySet()) 
+					{
+						fileData = fileDataEntry.getValue();
+						fileDataKey = fileDataEntry.getKey();
+						
+						//We verify first if we the filename already exists (and we create it if not)
+						idPart1 = fileDataKey;
+						idPart1 = idPart1*255;
+						idPart2 = idPart1*255;
+						id = idPart2 + 1;
+						
+						path = this.path(id, true);
+						
+						//System.out.println("Saving values for the file: "+path+" ("+id+") ["+subKey+", "+subsubKey+", "+fileDataKey+"]: "+idPart1+", "+idPart2+", "+id);
+						
+						//We ask to save the different ids and their value in the file
+						this.saveMultipleValues(path, fileData);	
+					}				
 				}
 			}
 		}
 		
-		buffer = new HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>>();
+		buffer = null;
+		System.gc();
+		buffer = new HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>>>();
+		this.checkFiles = true;
 		numberDataInBuffer = 0;
 		System.out.println("Buffer saved!");
 	}
@@ -603,18 +660,23 @@ public class Database {
 		if(!buffer.containsKey(first))
 			return -1;
 		
-		HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>> sub = buffer.get(first);
+		HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>> sub = buffer.get(first);
 		
 		if(!sub.containsKey(second))
 			return -1;
 		
-		HashMap<Integer, HashMap<Integer, Integer>> subsub = sub.get(second);
+		HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>> subsub = sub.get(second);
 		
 		if(!subsub.containsKey(third))
 			return -1;
 		
 		//The "file"
-		HashMap<Integer, Integer> fileData = subsub.get(third);
+		HashMap<Integer, HashMap<Integer, Integer>> intermediaryFileData = subsub.get(third);
+		
+		if(!intermediaryFileData.containsKey((Integer) idIntoFile/255))
+			return -1;
+		
+		HashMap<Integer, Integer> fileData = intermediaryFileData.get((Integer) idIntoFile/255);
 		
 		if(fileData.containsKey(idIntoFile))
 			return fileData.get(idIntoFile);
@@ -642,27 +704,30 @@ public class Database {
 								
 		//The "directories"
 		if(!buffer.containsKey(first))
-			buffer.put(first, new HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>());
+			buffer.put(first, new HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>>());
 		
-		HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>> sub = buffer.get(first);
+		HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>> sub = buffer.get(first);
 		
 		if(!sub.containsKey(second))
-			sub.put(second, new HashMap<Integer, HashMap<Integer, Integer>>());
+			sub.put(second, new HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>());
 		
-		HashMap<Integer, HashMap<Integer, Integer>> subsub = sub.get(second);
+		HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>> subsub = sub.get(second);
 		
 		if(!subsub.containsKey(third))
-			subsub.put(third, new HashMap<Integer, Integer>());
+			subsub.put(third, new HashMap<Integer, HashMap<Integer, Integer>>());
 		
 		//The "file"
-		HashMap<Integer, Integer> fileData = subsub.get(third);
+		HashMap<Integer, HashMap<Integer, Integer>> intermediaryFileData = subsub.get(third);
+		
+		if(!intermediaryFileData.containsKey((Integer) idIntoFile/255))
+			intermediaryFileData.put((Integer) idIntoFile/255, new HashMap<Integer, Integer>());
+		
+		HashMap<Integer, Integer> fileData = intermediaryFileData.get((Integer) idIntoFile/255);
 		
 		if(!fileData.containsKey(third))
 			numberDataInBuffer++;
 		
 		//We save the data
-		fileData.put(idIntoFile, value);
-		
-		//TODO : vérifier si c'est bien des références vers les objets qu'on obtient, et donc qu'il ne faut pas "putter" tout à l'envers ici :/
+		fileData.put(idIntoFile, value);		
 	}
 }
