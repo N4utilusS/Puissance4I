@@ -13,7 +13,7 @@ public class Model implements Subject, Runnable { // TODO Need to implement Subj
 	private boolean continueLearning = true;
 	private int amountOfGamesToLearn = 0;
 	private int gamesPlayed = 0;
-	public final static float INTERVAL = 1000f;
+	public final static float INTERVAL = 10000f;
 	private int temp;
 	private long savedTime;
 	private float averageTime = 0f;

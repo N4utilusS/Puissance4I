@@ -153,7 +153,7 @@ public class Database {
 					value = this.findValue(path, id);
 				
 					//Even if we got 0 (which means 'no data' or simply '0') we save it into the buffer to avoid needing to open the associated file next time... The db increases faster, but the setValue() will be faster too
-					this.saveValueToBuffer(path, id, 0);			
+					this.saveValueToBuffer(path, id, value);			
 				}
 			}			
 			
