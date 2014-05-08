@@ -21,7 +21,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class Database {
 	private int maxStates = 2;
 	private static Charset UTF8 = Charset.forName("UTF-8");
-	private final static String PATH_BEG = "db/";
+	private final static String PATH_BEG = "R:/db/";
 	
 	private ReadWriteLock rwl = new ReentrantReadWriteLock();
     private Lock rl = rwl.readLock();
@@ -30,7 +30,7 @@ public class Database {
 	private int[][] basicComputations;
 	private static HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>>> buffer;
 	
-	private static final int maxDataInBuffer = 1024*1024*250;
+	private static final int maxDataInBuffer = 1024*1024*1000;
 	private static int numberDataInBuffer = 0;
 	private static final boolean USE_BUFFER = true;
 	
@@ -261,8 +261,7 @@ public class Database {
 		for( ; i < 5; i++)
 			id += (basicComputations[0][state[i][0]] + basicComputations[1][state[i][1]] + basicComputations[2][state[i][2]] + basicComputations[3][state[i][3]] + basicComputations[4][state[i][4]]) * classicComputations[i];
 		
-		/* Initial algo:
-		int temp=0, j;
+		/*// Initial algo:		
 		for( ; i < 5; i++, temp=0)
 		{
 			for(j=0; j < 5; j++)
@@ -607,26 +606,34 @@ public class Database {
 					intermediaryFileDataKey = intermediaryFileDataEntry.getKey();
 					
 					fileDataKey = 0;
+					data = new HashMap<Integer, Integer>();
 					
 					//We need to know which file is concerned
 					for(Entry<Integer, HashMap<Integer, Integer>> fileDataEntry : intermediaryFileData.entrySet()) 
 					{
 						fileData = fileDataEntry.getValue();
-						fileDataKey = fileDataEntry.getKey();
+						if(fileDataKey == 0)
+							fileDataKey = fileDataEntry.getKey();
 						
-						//We verify first if we the filename already exists (and we create it if not)
-						idPart1 = fileDataKey;
-						idPart1 = idPart1*255;
-						idPart2 = idPart1*255;
-						id = idPart2 + 1;
+						for(Entry<Integer, Integer> lineDataEntry : fileData.entrySet()) 
+							data.put(lineDataEntry.getKey(), lineDataEntry.getValue());
 						
-						path = this.path(id, true);
-						
-						//System.out.println("Saving values for the file: "+path+" ("+id+") ["+subKey+", "+subsubKey+", "+fileDataKey+"]: "+idPart1+", "+idPart2+", "+id);
-						
-						//We ask to save the different ids and their value in the file
-						this.saveMultipleValues(path, fileData);	
-					}				
+					}		
+					
+					//We verify first if we the filename already exists (and we create it if not)
+					idPart1 = fileDataKey;
+					idPart1 = idPart1*255;
+					idPart2 = idPart1*255;
+					id = idPart2 + 1;
+					
+					path = this.path(id, true);
+					
+					//System.out.println("Sauvegarde buffer: "+fileDataKey+", idPart1:"+idPart1+", id:"+id+", path: "+path);
+					
+					//System.out.println("Saving values for the file: "+path+" ("+id+") ["+subKey+", "+subsubKey+", "+fileDataKey+"]: "+idPart1+", "+idPart2+", "+id);
+					
+					//We ask to save the different ids and their value in the file
+					this.saveMultipleValues(path, data);			
 				}
 			}
 		}
@@ -667,16 +674,16 @@ public class Database {
 		
 		HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>> subsub = sub.get(second);
 		
-		if(!subsub.containsKey(third))
+		if(!subsub.containsKey((Integer) idIntoFile/255))
 			return -1;
 		
 		//The "file"
-		HashMap<Integer, HashMap<Integer, Integer>> intermediaryFileData = subsub.get(third);
+		HashMap<Integer, HashMap<Integer, Integer>> intermediaryFileData = subsub.get((Integer) idIntoFile/255);
 		
-		if(!intermediaryFileData.containsKey((Integer) idIntoFile/255))
+		if(!intermediaryFileData.containsKey(third))
 			return -1;
 		
-		HashMap<Integer, Integer> fileData = intermediaryFileData.get((Integer) idIntoFile/255);
+		HashMap<Integer, Integer> fileData = intermediaryFileData.get(third);
 		
 		if(fileData.containsKey(idIntoFile))
 			return fileData.get(idIntoFile);
@@ -713,21 +720,24 @@ public class Database {
 		
 		HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>> subsub = sub.get(second);
 		
-		if(!subsub.containsKey(third))
-			subsub.put(third, new HashMap<Integer, HashMap<Integer, Integer>>());
+		if(!subsub.containsKey((Integer) idIntoFile/255))
+			subsub.put((Integer) idIntoFile/255, new HashMap<Integer, HashMap<Integer, Integer>>());
 		
 		//The "file"
-		HashMap<Integer, HashMap<Integer, Integer>> intermediaryFileData = subsub.get(third);
+		HashMap<Integer, HashMap<Integer, Integer>> intermediaryFileData = subsub.get((Integer) idIntoFile/255);
 		
-		if(!intermediaryFileData.containsKey((Integer) idIntoFile/255))
-			intermediaryFileData.put((Integer) idIntoFile/255, new HashMap<Integer, Integer>());
+		if(!intermediaryFileData.containsKey(third))
+			intermediaryFileData.put(third, new HashMap<Integer, Integer>());
 		
-		HashMap<Integer, Integer> fileData = intermediaryFileData.get((Integer) idIntoFile/255);
+		HashMap<Integer, Integer> fileData = intermediaryFileData.get(third);
 		
-		if(!fileData.containsKey(third))
+		if(!fileData.containsKey(idIntoFile))
 			numberDataInBuffer++;
+
 		
 		//We save the data
-		fileData.put(idIntoFile, value);		
+		fileData.put(idIntoFile, value);
+		
+		//TODO : vérifier si c'est bien des références vers les objets qu'on obtient, et donc qu'il ne faut pas "putter" tout à l'envers ici :/
 	}
 }
