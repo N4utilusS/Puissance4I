@@ -509,7 +509,7 @@ public class Database {
 				 			lineValue = lineEntry.getValue();
 				 			lineKey = lineEntry.getKey();
 				 			
-				 			if(currentId == lineValue)//We are at the right place
+				 			if(currentId == lineKey)//We are at the right place
 					    	{//We are at the correct place, we can replace the character we just read. We cannot stop the loop anyway
 					    		 current = lineValue;
 

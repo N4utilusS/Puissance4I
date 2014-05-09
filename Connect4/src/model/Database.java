@@ -30,7 +30,7 @@ public class Database {
 	private int[][] basicComputations;
 	private static HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>>> buffer;
 	
-	private static final int maxDataInBuffer = 1024*1024*1000;
+	private static final int maxDataInBuffer = 1024*1024*100;
 	private static int numberDataInBuffer = 0;
 	private static final boolean USE_BUFFER = true;
 	
@@ -509,7 +509,7 @@ public class Database {
 				 			lineValue = lineEntry.getValue();
 				 			lineKey = lineEntry.getKey();
 				 			
-				 			if(currentId == lineValue)//We are at the right place
+				 			if(currentId == lineKey)//We are at the right place
 					    	{//We are at the correct place, we can replace the character we just read. We cannot stop the loop anyway
 					    		 current = lineValue;
 
