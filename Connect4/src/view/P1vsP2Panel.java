@@ -39,7 +39,7 @@ public class P1vsP2Panel extends JPanel implements ActionListener {
 	public void init() {
 		this.button1 = new JButton(namePlayer1);
 		this.button1.setOpaque(true);
-		this.button1.setBackground(Color.RED);
+		this.button1.setBackground(Color.YELLOW);
 		//this.button1.setPreferredSize(new Dimension(100,50));
 		this.button1.setBorderPainted(false);
 		
@@ -47,7 +47,7 @@ public class P1vsP2Panel extends JPanel implements ActionListener {
 		
 		this.button2 = new JButton(namePlayer2);
 		this.button2.setOpaque(true);
-		this.button2.setBackground(Color.YELLOW);
+		this.button2.setBackground(Color.RED);
 		this.button2.setBorderPainted(false);
 		this.button2.setEnabled(false);
 		

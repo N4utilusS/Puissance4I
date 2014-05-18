@@ -18,12 +18,12 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
-import javax.swing.WindowConstants;
 
 import model.Model;
 import model.players.Adviser;
 import model.players.Decider;
 import model.players.Player;
+import model.players.RightPlayer;
 import observer.Observer;
 import controller.Controller;
 
@@ -34,6 +34,7 @@ public class Window extends JFrame implements Observer, ActionListener, WindowLi
 	private static final long serialVersionUID = 1L;
 	public final static String NEW_GAME_PLAYER_FIRST = "New Game Player First";
 	public final static String NEW_GAME_COMPUTER_FIRST = "New Game Computer First";
+	public final static String NEW_GAME_PLAYER_FIRST_COMPUTER_RIGHT_PLAYER = "New Game Player First (Computer right player)";
 	
 	private JPanel mainPanel;
 	private JMenuBar menuBar;
@@ -78,7 +79,7 @@ public class Window extends JFrame implements Observer, ActionListener, WindowLi
 		c.gridy = 2;
 		this.mainPanel.add(this.hintPanel, c);
 		
-		this.playersPanel = new P1vsP2Panel(this.controller, "Alexis", "Gilles");
+		this.playersPanel = new P1vsP2Panel(this.controller, "P1", "P2");
 		c.gridy = 3;
 		this.mainPanel.add(this.playersPanel, c);
 		
@@ -97,21 +98,22 @@ public class Window extends JFrame implements Observer, ActionListener, WindowLi
 		menuItem.addActionListener(this);
 		menu.add(menuItem);
 		
-		menuItem = new JMenuItem(NEW_GAME_COMPUTER_FIRST);
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.ALT_MASK));
+		menuItem = new JMenuItem(NEW_GAME_PLAYER_FIRST_COMPUTER_RIGHT_PLAYER);
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.ALT_MASK));
 		menuItem.getAccessibleContext().setAccessibleDescription("Play a new game!");
 		menuItem.addActionListener(this);
 		menu.add(menuItem);
 		
-		menuItem = new JMenuItem("Save");
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.ALT_MASK));
-		menuItem.getAccessibleContext().setAccessibleDescription("Save the current game!");
+		menuItem = new JMenuItem(NEW_GAME_COMPUTER_FIRST);
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.ALT_MASK));
+		menuItem.getAccessibleContext().setAccessibleDescription("Play a new game!");
+		menuItem.addActionListener(this);
 		menu.add(menuItem);
 		
 		menu.addSeparator();
 		
 		menuItem = new JMenuItem("Rules");
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, ActionEvent.ALT_MASK));
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_H, ActionEvent.ALT_MASK));
 		menuItem.getAccessibleContext().setAccessibleDescription("Rules about the game");
 		menu.add(menuItem);
 		
@@ -122,9 +124,8 @@ public class Window extends JFrame implements Observer, ActionListener, WindowLi
 	public void update(Object o) {
 		if (o instanceof Player) {
 			Player p = (Player) o;
+			this.hintPanel.setBackground(Color.BLACK);
 			this.connectPanel.updateTable(p.getState());
-			//this.hintPanel.setBackground(Color.BLACK);
-			this.hintPanel.repaint();
 			if (p.getStatus() != Player.PLAYING) {
 				String message;
 				if (p.getStatus() == Player.WON) {
@@ -142,22 +143,24 @@ public class Window extends JFrame implements Observer, ActionListener, WindowLi
 				this.connectPanel.removeMouseListener(this.connectPanel.getMouseListeners()[0]);
 			}
 		} else if (o instanceof Adviser) {
+			this.hintPanel.setBackground(Color.GREEN);
 			this.hintPanel.updateHint(((Adviser) o).getValues());
-			//this.hintPanel.setBackground(Color.GREEN);
-			this.hintPanel.repaint();
+			//this.hintPanel.repaint();
+			
 		} else if (o instanceof Decider) {
 			Decider d = (Decider) o;
 			this.connectPanel.updateTable(d.getState());
+			this.hintPanel.setBackground(Color.RED);
 			this.hintPanel.updateHint(d.getValues());
-			//this.hintPanel.setBackground(Color.RED);
-			this.hintPanel.repaint();
+			//this.hintPanel.repaint();
+			
+		} else if (o instanceof RightPlayer) {
+			RightPlayer r = (RightPlayer) o;
+			this.connectPanel.updateTable(r.getState());
+			this.hintPanel.setBackground(Color.RED);
+			this.hintPanel.updateHint(r.getValues());
+			//this.hintPanel.repaint();
 
-			/*try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}*/
 		} else if (o instanceof Model) {
 			this.learnPanel.setNbOfGamesPlayed(((Model) o).getGamesPlayed());
 		}

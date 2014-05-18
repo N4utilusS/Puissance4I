@@ -47,6 +47,10 @@ public class Controller {
 			this.view.removeListeners();
 			this.view.addListeners();
 			this.model.startGame(Game.COMPUTER_VS_HUMAN);
+		} else if (Window.NEW_GAME_PLAYER_FIRST_COMPUTER_RIGHT_PLAYER.equals(actionCommand)) {
+			this.view.removeListeners();
+			this.view.addListeners();
+			this.model.startGame(Game.HUMAN_VS_COMPUTER_RIGHT);
 		}
 	}
 

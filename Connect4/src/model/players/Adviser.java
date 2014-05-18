@@ -37,9 +37,9 @@ public class Adviser extends AbstractPlayer implements Subject {
 		// Get all the pseudo states for all the columns.
 		for (int i = 0; i < Board.WIDTH; ++i) {
 			if (heights[i] < Board.HEIGHT) {
-				getBoard().addCoinInColumn(i, Learner.LEARN_TYPE);
+				board.addCoinInColumn(i, Learner.LEARN_TYPE);
 				values[i] = PseudoState.getPseudoStateForColumn(i, board).getValue();
-				getBoard().removeCoinInColumn(i);
+				board.removeCoinInColumn(i);
 			}
 		}
 

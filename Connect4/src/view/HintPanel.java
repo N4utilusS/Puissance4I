@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 
 import javax.swing.JPanel;
 
@@ -22,6 +23,8 @@ public class HintPanel extends JPanel {
 
 	private Controller controller;
 
+	private Color color = new Color(237,237,237);
+
 
 	public HintPanel(Controller controller) {
 		this.controller = controller;
@@ -36,9 +39,10 @@ public class HintPanel extends JPanel {
 
 	public void paintComponent(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		
 		//Background
-		g2.setColor(new Color(237,237,237));
+		g2.setColor(this.color);
 		g2.fillRect(0, 0, this.getWidth(), this.getHeight());
 		
 		g2.setColor(Color.BLACK);
@@ -50,5 +54,11 @@ public class HintPanel extends JPanel {
 	public void updateHint(int[] hintValues) {
 		this.hintValues = hintValues;
 		this.repaint();
+	}
+	
+	@Override
+	public void setBackground(Color color) {
+		super.setBackground(color);
+		this.color  = color;
 	}
 }
