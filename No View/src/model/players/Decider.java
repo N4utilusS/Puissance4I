@@ -16,7 +16,7 @@ import observer.Subject;
  */
 public class Decider extends AbstractPlayer implements Subject{
 
-	public static float EPSILON = 0.1f;
+	private float epsilon = 0.1f;
 	private Random random;
 	private Observer observer;
 	private int[] values;
@@ -24,7 +24,7 @@ public class Decider extends AbstractPlayer implements Subject{
 	public Decider(int type, Board board, Observer obs, float epsilon){
 		super(type, board);
 		
-		this.EPSILON = epsilon;
+		this.epsilon = epsilon;
 		this.addObserver(obs);
 		this.random = new Random();
 	}
@@ -79,7 +79,7 @@ public class Decider extends AbstractPlayer implements Subject{
 		}
 
 		// Choose one.
-		if (random.nextFloat() >= EPSILON) {
+		if (random.nextFloat() >= epsilon) {
 			int column = best.get(random.nextInt(best.size()));
 			getLearner().newState(states[column]);
 			getBoard().addCoinInColumn(column, getType());

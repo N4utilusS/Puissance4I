@@ -1,5 +1,6 @@
 package model;
 
+
 /**
  * Represents the playing board and its state, with a matrix of integers and
  * the heights of the different columns.
@@ -118,10 +119,10 @@ public class Board {
 		}
 		
 		for (int i = 1; i <= Board.WIDTH-4; ++i) {
-			for (int j = Board.HEIGHT-1; j >= 0 && i + Board.HEIGHT - j < Board.WIDTH; --j) {
-				if (grid[i + Board.HEIGHT - j][j] != type) {
+			for (int j = Board.HEIGHT-1; j >= 0 && i + Board.HEIGHT-1 - j < Board.WIDTH; --j) {
+				if (grid[i + Board.HEIGHT-1 - j][j] != type) {
 					count = 0;
-					type = grid[i + Board.HEIGHT - j][j];
+					type = grid[i + Board.HEIGHT-1 - j][j];
 				}
 				if (type != 0)
 					count++;
