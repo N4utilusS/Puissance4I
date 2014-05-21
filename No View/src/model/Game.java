@@ -30,15 +30,15 @@ public class Game {
 		
 		switch (mode) {
 		case COMPUTER_VS_COMPUTER:
-			this.players[0] = new Decider(1, this.board, obs);
-			this.players[1] = new Decider(2, this.board, obs);
+			this.players[0] = new Decider(1, this.board, obs, 0.5f);
+			this.players[1] = new Decider(2, this.board, obs, 0.5f);
 			break;
 		case HUMAN_VS_COMPUTER:
 			this.players[0] = new Player(1, this.board, obs);
-			this.players[1] = new Decider(2, this.board, obs);
+			this.players[1] = new Decider(2, this.board, obs, 0.05f);
 			break;
 		case COMPUTER_VS_HUMAN:
-			this.players[0] = new Decider(1, this.board, obs);
+			this.players[0] = new Decider(1, this.board, obs, 0.05f);
 			this.players[1] = new Player(2, this.board, obs);
 		}
 		

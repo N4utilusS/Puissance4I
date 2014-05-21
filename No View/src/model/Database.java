@@ -28,9 +28,9 @@ public class Database {
     private Lock wl = rwl.writeLock();
 	private long[] classicComputations;
 	private int[][] basicComputations;
-	private static HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>>> buffer;
+	private static HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>> buffer;
 	
-	private static final int maxDataInBuffer = 1024*1024*1000;
+	private static final int maxDataInBuffer = 1024*1024*100;
 	private static int numberDataInBuffer = 0;
 	private static final boolean USE_BUFFER = true;
 	
@@ -46,7 +46,7 @@ public class Database {
 	private Database(){
 		super();
 		
-		buffer = new HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>>>();
+		buffer = new HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer,Integer>>>>();
 		startingTime = System.currentTimeMillis();
 		this.initComputations();
 		
@@ -151,9 +151,11 @@ public class Database {
 				else
 				{
 					value = this.findValue(path, id);
-				
+					//if(value != 0)
+					//	System.out.println("Found a value != 0 in files: "+value);
+
 					//Even if we got 0 (which means 'no data' or simply '0') we save it into the buffer to avoid needing to open the associated file next time... The db increases faster, but the setValue() will be faster too
-					this.saveValueToBuffer(path, id, value);			
+					this.saveValueToBuffer(path, id, value);
 				}
 			}			
 			
@@ -572,13 +574,14 @@ public class Database {
 	 */
 	public void saveBufferToFiles()
 	{
-		HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>> sub;
-		HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>> subsub;
-		HashMap<Integer, HashMap<Integer, Integer>> intermediaryFileData;
+		HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>> sub;
+		HashMap<Integer, HashMap<Integer, Integer>> subsub;
+		HashMap<Integer, Integer> intermediaryFileData;
 		HashMap<Integer, Integer> fileData;
-		HashMap<Integer, Integer> data;
+		HashMap<Integer, Integer> data, dataCopy;
 		Integer subKey, subsubKey, intermediaryFileDataKey, fileDataKey, lineKey, lineValue;
 		long id=0L, idPart1=0L, idPart2=0L;
+		int valueSaved=0, total=0;
 		String path = "";
 		
 		if(USE_BUFFER == false)
@@ -590,60 +593,64 @@ public class Database {
 		System.out.println("Saving buffer...");
 		
 		//We list all the data in the general buffer attribut
-		for(Entry<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>>> subEntry : buffer.entrySet()) 
+		for(Entry<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>> subEntry : buffer.entrySet()) 
 		{			
 			sub = subEntry.getValue();
 			subKey = subEntry.getKey();
 			
-			for(Entry<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>> subsubEntry : sub.entrySet()) 
+			for(Entry<Integer, HashMap<Integer, HashMap<Integer, Integer>>> subsubEntry : sub.entrySet()) 
 			{
 				subsub = subsubEntry.getValue();
 				subsubKey = subsubEntry.getKey();
 				
-				for(Entry<Integer, HashMap<Integer, HashMap<Integer, Integer>>> intermediaryFileDataEntry : subsub.entrySet()) 
+				for(Entry<Integer, HashMap<Integer, Integer>> fileDataEntry : subsub.entrySet()) 
 				{
-					intermediaryFileData = intermediaryFileDataEntry.getValue();
-					intermediaryFileDataKey = intermediaryFileDataEntry.getKey();
-					
-					fileDataKey = 0;
-					data = new HashMap<Integer, Integer>();
-					
-					//We need to know which file is concerned
-					for(Entry<Integer, HashMap<Integer, Integer>> fileDataEntry : intermediaryFileData.entrySet()) 
-					{
-						fileData = fileDataEntry.getValue();
-						if(fileDataKey == 0)
-							fileDataKey = fileDataEntry.getKey();
-						
-						for(Entry<Integer, Integer> lineDataEntry : fileData.entrySet()) 
-							data.put(lineDataEntry.getKey(), lineDataEntry.getValue());
-						
-					}		
+					fileData = fileDataEntry.getValue();
+					fileDataKey = fileDataEntry.getKey();
+										
+					if(fileDataKey == -1)
+						System.err.println("Error in saveBufferToFiles().");
 					
 					//We verify first if we the filename already exists (and we create it if not)
 					idPart1 = fileDataKey;
 					idPart1 = idPart1*255;
 					idPart2 = idPart1*255;
-					id = idPart2 + 1;
+					id = idPart2 + 1;					
+					path = this.path(id, true);//METTRE TRUE APRES DEBUG					
 					
-					path = this.path(id, true);
-					
-					//System.out.println("Sauvegarde buffer: "+fileDataKey+", idPart1:"+idPart1+", id:"+id+", path: "+path);
-					
-					//System.out.println("Saving values for the file: "+path+" ("+id+") ["+subKey+", "+subsubKey+", "+fileDataKey+"]: "+idPart1+", "+idPart2+", "+id);
+					if(!path.equals(PATH_BEG+subKey+"/"+subsubKey+"/"+fileDataKey+".db"))
+						System.out.println(path+" != "+PATH_BEG+subKey+"/"+subsubKey+"/"+fileDataKey+".db");
 					
 					//We ask to save the different ids and their value in the file
-					this.saveMultipleValues(path, data);			
+					dataCopy = new HashMap<Integer, Integer>(fileData);
+					this.saveMultipleValues(path, fileData);						
+					
+					//TO DELETE
+					
+					for(Entry<Integer, Integer> lineEntry : dataCopy.entrySet()) 
+			 		{
+			 			lineValue = lineEntry.getValue();
+			 			lineKey = lineEntry.getKey();
+			 			total++;
+			 			idPart1 = fileDataKey;
+						idPart1 = idPart1*255;
+						idPart2 = idPart1*255;
+						id = idPart2 + lineKey;
+						path = this.path(id, false);
+						valueSaved = this.findValue(path, id);
+						if(valueSaved != lineValue)
+							System.err.println("Value to save: "+lineValue+" and value really saved: "+valueSaved);
+			 		}
 				}
 			}
 		}
 		
 		buffer = null;
 		System.gc();
-		buffer = new HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>>>();
+		buffer = new HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>>();
 		this.checkFiles = true;
 		numberDataInBuffer = 0;
-		System.out.println("Buffer saved!");
+		System.out.println("Buffer saved ("+total+" entries)!");
 	}
 	
 	/**
@@ -667,23 +674,18 @@ public class Database {
 		if(!buffer.containsKey(first))
 			return -1;
 		
-		HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>> sub = buffer.get(first);
+		HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>> sub = buffer.get(first);
 		
 		if(!sub.containsKey(second))
 			return -1;
 		
-		HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>> subsub = sub.get(second);
+		HashMap<Integer, HashMap<Integer, Integer>> subsub = sub.get(second);
 		
-		if(!subsub.containsKey((Integer) idIntoFile/255))
+		if(!subsub.containsKey(third))
 			return -1;
 		
-		//The "file"
-		HashMap<Integer, HashMap<Integer, Integer>> intermediaryFileData = subsub.get((Integer) idIntoFile/255);
-		
-		if(!intermediaryFileData.containsKey(third))
-			return -1;
-		
-		HashMap<Integer, Integer> fileData = intermediaryFileData.get(third);
+		//The "file"		
+		HashMap<Integer, Integer> fileData = subsub.get(third);
 		
 		if(fileData.containsKey(idIntoFile))
 			return fileData.get(idIntoFile);
@@ -711,33 +713,24 @@ public class Database {
 								
 		//The "directories"
 		if(!buffer.containsKey(first))
-			buffer.put(first, new HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>>());
+			buffer.put(first, new HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>());
 		
-		HashMap<Integer, HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>> sub = buffer.get(first);
+		HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>> sub = buffer.get(first);
 		
 		if(!sub.containsKey(second))
-			sub.put(second, new HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>>());
+			sub.put(second, new HashMap<Integer, HashMap<Integer, Integer>>());
 		
-		HashMap<Integer, HashMap<Integer, HashMap<Integer, Integer>>> subsub = sub.get(second);
+		HashMap<Integer, HashMap<Integer, Integer>> subsub = sub.get(second);
 		
-		if(!subsub.containsKey((Integer) idIntoFile/255))
-			subsub.put((Integer) idIntoFile/255, new HashMap<Integer, HashMap<Integer, Integer>>());
+		if(!subsub.containsKey(third))
+			subsub.put(third, new HashMap<Integer, Integer>());
 		
 		//The "file"
-		HashMap<Integer, HashMap<Integer, Integer>> intermediaryFileData = subsub.get((Integer) idIntoFile/255);
-		
-		if(!intermediaryFileData.containsKey(third))
-			intermediaryFileData.put(third, new HashMap<Integer, Integer>());
-		
-		HashMap<Integer, Integer> fileData = intermediaryFileData.get(third);
-		
+		HashMap<Integer, Integer> fileData = subsub.get(third);		
 		if(!fileData.containsKey(idIntoFile))
 			numberDataInBuffer++;
 
-		
 		//We save the data
-		fileData.put(idIntoFile, value);
-		
-		//TODO : vérifier si c'est bien des références vers les objets qu'on obtient, et donc qu'il ne faut pas "putter" tout à l'envers ici :/
+		fileData.put(idIntoFile, value);		
 	}
 }

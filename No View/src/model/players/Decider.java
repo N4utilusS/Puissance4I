@@ -16,14 +16,15 @@ import observer.Subject;
  */
 public class Decider extends AbstractPlayer implements Subject{
 
-	public final static float EPSILON = 0.1f;
+	public static float EPSILON = 0.1f;
 	private Random random;
 	private Observer observer;
 	private int[] values;
 
-	public Decider(int type, Board board, Observer obs){
+	public Decider(int type, Board board, Observer obs, float epsilon){
 		super(type, board);
-
+		
+		this.EPSILON = epsilon;
 		this.addObserver(obs);
 		this.random = new Random();
 	}

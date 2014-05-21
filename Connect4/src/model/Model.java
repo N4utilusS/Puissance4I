@@ -48,6 +48,7 @@ public class Model implements Subject, Runnable { // TODO Need to implement Subj
 	
 	public void startLearning(int amountOfGames) {
 		
+		
 		if (this.learningThread != null) {
 			this.continueLearning = false;
 			try {
